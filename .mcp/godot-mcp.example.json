@@ -1,0 +1,33 @@
+{
+    "mcpServers": {
+        "godot": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@coding-solo/godot-mcp"
+            ],
+            "env": {
+                "GODOT_PATH": "<请替换为你本机的 Godot 可执行文件绝对路径，例如 C:/Tools/Godot/Godot.exe>",
+                "DEBUG": "true"
+            },
+            "type": "stdio",
+            "disabled": false,
+            "autoApprove": [
+                "launch_editor",
+                "run_project",
+                "get_debug_output",
+                "stop_project",
+                "get_godot_version",
+                "list_projects",
+                "get_project_info",
+                "create_scene",
+                "add_node",
+                "load_sprite",
+                "export_mesh_library",
+                "save_scene",
+                "get_uid",
+                "update_project_uids"
+            ]
+        }
+    }
+}

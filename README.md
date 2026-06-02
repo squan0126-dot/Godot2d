@@ -108,3 +108,11 @@ Dialogic.timeline_ended.connect(_on_dialogue_end)
 - **跨模块通信只走 EventBus 信号**，不要互相 import。
 - **数据驱动**：成就、时间轴节点放在 `data/*.json`；新增内容只改 JSON，不改代码。
 - **存档统一走 SaveSystem**，业务模块提供 `to_dict / from_dict` 接口给它调用。
+
+## AI 编码辅助（可选）
+
+本仓库提供 [Godot MCP](https://github.com/Coding-Solo/godot-mcp) 的示例配置，让 AI 助手（Cursor / Cline / Claude Desktop / 腾讯 gongfeng-copilot 等）能直接打开项目、运行场景、读取报错、增删节点等。
+
+详见 [`.mcp/README.md`](.mcp/README.md) 与示例配置 [`.mcp/godot-mcp.example.json`](.mcp/godot-mcp.example.json)。
+
+非必要，纯手写代码完全不影响游戏运行。
