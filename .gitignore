@@ -1,0 +1,27 @@
+# Godot 4 自动生成的目录与文件
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+
+# 平台导出产物
+/builds/
+*.exe
+*.pck
+*.zip
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# 临时生成
+_disha_gen.*
+
+# 大尺寸原作小说文本（仅本地参考，不入库）
+docs/参考资料/地煞七十二变-原文.txt

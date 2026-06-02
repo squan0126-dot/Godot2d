@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/TitleScreen.gd" id="1_title"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_title")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.08, 1)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 160.0
+offset_bottom = 320.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 120
+text = "Disha"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(560, 0)
+theme_override_constants/separation = 24
+
+[node name="BtnNew" type="Button" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 96)
+theme_override_font_sizes/font_size = 36
+text = "开始新游戏"
+
+[node name="BtnContinue" type="Button" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 96)
+theme_override_font_sizes/font_size = 36
+text = "继续游戏"
+
+[node name="BtnLoad" type="Button" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 96)
+theme_override_font_sizes/font_size = 36
+text = "读取存档"
+
+[node name="BtnAchievement" type="Button" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 96)
+theme_override_font_sizes/font_size = 36
+text = "成就"
+
+[node name="BtnQuit" type="Button" parent="Center/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 96)
+theme_override_font_sizes/font_size = 36
+text = "退出"

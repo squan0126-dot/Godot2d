@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3 uid="uid://disha_timeline_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/TimelineView.gd" id="1_tl"]
+
+[node name="TimelineView" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_tl")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.06, 0.06, 0.08, 1)
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = 128.0
+
+[node name="Title" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 48
+text = "故事时间轴"
+
+[node name="BtnBack" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(160, 88)
+theme_override_font_sizes/font_size = 28
+text = "返回"
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 80.0
+offset_top = 160.0
+offset_right = -80.0
+offset_bottom = -80.0
+
+[node name="VBox" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 24

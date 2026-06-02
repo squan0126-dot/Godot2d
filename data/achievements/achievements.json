@@ -1,0 +1,23 @@
+[
+    {
+        "id": "first_dialogue",
+        "name": "初次对话",
+        "description": "完成游戏中的第一段对话。",
+        "icon": "",
+        "hidden": false
+    },
+    {
+        "id": "story_complete_ch1",
+        "name": "第一章完结",
+        "description": "完成游戏第一章。",
+        "icon": "",
+        "hidden": false
+    },
+    {
+        "id": "secret_ending",
+        "name": "???",
+        "description": "达成隐藏结局。",
+        "icon": "",
+        "hidden": true
+    }
+]

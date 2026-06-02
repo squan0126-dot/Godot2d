@@ -1,0 +1,16 @@
+[
+    {
+        "id": "intro",
+        "title": "序章",
+        "description": "故事的开始。海边的小镇，一个陌生人正在等待。",
+        "chapter": 1,
+        "order": 0
+    },
+    {
+        "id": "ch1_meet",
+        "title": "邂逅",
+        "description": "在小镇上遇见了一位神秘人。",
+        "chapter": 1,
+        "order": 1
+    }
+]

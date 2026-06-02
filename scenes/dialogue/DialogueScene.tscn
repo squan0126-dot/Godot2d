@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3 uid="uid://disha_dialogue_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/DialogueScene.gd" id="1_dlg"]
+
+[node name="DialogueScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_dlg")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.1, 1)
+
+[node name="DialogicHost" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+
+[node name="TopBarLayer" type="CanvasLayer" parent="."]
+layer = 200
+
+[node name="TopBar" type="HBoxContainer" parent="TopBarLayer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = 128.0
+alignment = 2
+theme_override_constants/separation = 16
+mouse_filter = 0
+
+[node name="BtnSave" type="Button" parent="TopBarLayer/TopBar"]
+custom_minimum_size = Vector2(160, 88)
+theme_override_font_sizes/font_size = 28
+text = "保存(F5)"
+
+[node name="BtnSkip" type="Button" parent="TopBarLayer/TopBar"]
+custom_minimum_size = Vector2(160, 88)
+theme_override_font_sizes/font_size = 28
+text = "跳过"
+
+[node name="BtnBack" type="Button" parent="TopBarLayer/TopBar"]
+custom_minimum_size = Vector2(160, 88)
+theme_override_font_sizes/font_size = 28
+text = "返回"
