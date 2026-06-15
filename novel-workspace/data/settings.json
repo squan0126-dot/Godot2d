@@ -5,5 +5,68 @@
     "第三幕·转（成长与接受）",
     "第四幕·合（侠义成型与终局）"
   ],
-  "relPositions": {}
+  "relPositions": {},
+  "theme": "dark",
+  "autoSave": true,
+  "fontSize": 16,
+  "editorFont": "serif",
+  "styleRules": {
+    "bannedWords": [
+      {"word": "恐怖", "level": "error", "msg": "禁用词\"恐怖\"，请替换为具体感官细节（视觉/嗅觉/触觉）"},
+      {"word": "可怕", "level": "error", "msg": "禁用词\"可怕\"，请替换为具体感官细节"},
+      {"word": "令人毛骨悚然", "level": "error", "msg": "禁用词\"令人毛骨悚然\"，请替换为具体感官细节"},
+      {"word": "毛骨悚然", "level": "error", "msg": "禁用词\"毛骨悚然\"，请替换为具体感官细节"},
+      {"word": "泪流满面", "level": "error", "msg": "禁用煽情词\"泪流满面\"，用白描替代"},
+      {"word": "心如刀割", "level": "error", "msg": "禁用煽情词\"心如刀割\"，用白描替代"},
+      {"word": "肝肠寸断", "level": "error", "msg": "禁用煽情词\"肝肠寸断\"，用白描替代"},
+      {"word": "他感到一阵恐惧", "level": "error", "msg": "禁止直接写情绪\"感到恐惧\"，用行动或感官细节替代"},
+      {"word": "他感到一阵震惊", "level": "error", "msg": "禁止直接写情绪\"感到震惊\"，用行动或感官细节替代"},
+      {"word": "他感到不可思议", "level": "error", "msg": "禁止直接写情绪，用行动替代"},
+      {"word": "这就是所谓的", "level": "warn", "msg": "疑似解释性旁白，请删除或改为角色视角"},
+      {"word": "读者可能不知道", "level": "error", "msg": "禁止解释性旁白"}
+    ],
+    "bannedClichés": [
+      {"word": "震惊！", "level": "error", "msg": "禁用网文套路\"震惊！\""},
+      {"word": "这怎么可能！", "level": "error", "msg": "禁用网文套路\"这怎么可能！\""},
+      {"word": "你找死！", "level": "error", "msg": "禁用网文套路\"你找死！\""},
+      {"word": "找死！", "level": "error", "msg": "禁用网文套路"}
+    ],
+    "frequencyChecks": [
+      {"words": ["竟然", "居然"], "maxPerParagraph": 1, "level": "warn", "msg": "本段中\"竟然/居然\"出现{count}次，建议保留1处"}
+    ],
+    "structureRules": {
+      "openingMinChars": 4,
+      "openingMaxChars": 12,
+      "actionMaxChars": 15,
+      "maxAdjectivesBeforeNoun": 2,
+      "maxConsecutiveInnerMonologue": 3
+    },
+    "sentimentWords": [
+      "心痛", "心碎", "绝望", "崩溃", "撕心裂肺", "万念俱灰",
+      "欣喜若狂", "激动万分", "感动", "热泪", "泣不成声"
+    ],
+    "explanatoryPatterns": [
+      "这就是", "也就是说", "换句话说",
+      "众所周知", "不言而喻", "需要说明的是", "值得注意的是"
+    ]
+  },
+  "writingTaboos": [
+    "恐怖", "可怕", "毛骨悚然", "令人毛骨悚然",
+    "泪流满面", "心如刀割", "肝肠寸断",
+    "震惊！", "这怎么可能！", "你找死！"
+  ],
+  "writingPreferred": [
+    "甫一", "悚然", "径直", "好似", "腹诽", "嗤笑", "面面相觑",
+    "忽的", "霎时", "骤然", "遽然"
+  ],
+  "abilities": [
+    {"name": "通幽", "desc": "见鬼、触鬼——从模糊感知转为清晰可视化", "case": "案一解锁"},
+    {"name": "驱神", "desc": "役使小灵体，可以让小鬼帮忙侦察", "case": "案二解锁"},
+    {"name": "禁水", "desc": "水下呼吸/水中行动", "case": "案三解锁"},
+    {"name": "斩妖", "desc": "对妖鬼的破甲攻击", "case": "案四解锁"},
+    {"name": "借风", "desc": "短距离快速移动/加速", "case": "案五解锁"},
+    {"name": "布雾", "desc": "遮蔽视线", "case": "案六解锁"},
+    {"name": "定身", "desc": "短暂束缚", "case": "案七解锁"},
+    {"name": "残魂感知", "desc": "感知残魂的存在与方位，辅助收拢赵匡胤前世残魂", "case": "中期解锁"}
+  ]
 }
