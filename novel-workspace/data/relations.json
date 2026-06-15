@@ -1,0 +1,34 @@
+[
+  {
+    "id": "rel_1",
+    "from": "char_ligz",
+    "to": "char_xuanyi",
+    "label": "师徒",
+    "type": "师承",
+    "desc": "玄义因发现李归舟能见鬼而留其为帮手。教剑术、道法、侠义。案一中牺牲，衣钵传承。"
+  },
+  {
+    "id": "rel_2",
+    "from": "char_xuanyi",
+    "to": "char_chongwei",
+    "label": "师徒",
+    "type": "师承",
+    "desc": "冲微是玄义的师父，死在蛟嘴里。师承链：冲微→玄义→李归舟。"
+  },
+  {
+    "id": "rel_3",
+    "from": "char_ligz",
+    "to": "char_zhaoky",
+    "label": "守玉人↔困魂",
+    "type": "羁绊",
+    "desc": "李归舟是当代守玉人，赵匡胤困在玉佩中。斩妖点亮刻痕→赵匡胤投胎。从案3开始逐步建立联系。"
+  },
+  {
+    "id": "rel_4",
+    "from": "char_ligz",
+    "to": "char_zhaodutou",
+    "label": "斩杀",
+    "type": "对抗",
+    "desc": "案一最终战。李归舟用玄义老道教的法子（道火+灯油圈）烧杀七个饿妖。"
+  }
+]
