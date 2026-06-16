@@ -3,1766 +3,326 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📖 小说创作工作台</title>
-<style>
-:root{
-  --bg:#0f1117;--bg2:#1a1d27;--bg3:#242836;--bg4:#2e3345;--bg5:#383d50;
-  --text:#e8eaf0;--text2:#a0a8c0;--text3:#6b7394;
-  --accent:#6366f1;--accent2:#818cf8;--accent-dim:#4338ca;
-  --green:#10b981;--yellow:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--cyan:#06b6d4;--orange:#f97316;
-  --border:#2a2f40;--border2:#363c52;
-  --radius:8px;--radius2:12px;
-  --shadow:0 4px 24px rgba(0,0,0,.4);
-  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  --font-serif:'Georgia','Noto Serif SC',serif;
-  --font-mono:'JetBrains Mono','Fira Code',monospace;
-  --sidebar-w:240px;--topbar-h:48px;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:14px;line-height:1.5;}
-::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
-::-webkit-scrollbar-thumb:hover{background:var(--bg5);}
-
-/* === 顶栏 === */
-.topbar{height:var(--topbar-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:100;}
-.topbar-logo{font-size:15px;font-weight:700;color:var(--accent2);white-space:nowrap;}
-.topbar-project{font-size:13px;color:var(--text2);cursor:pointer;padding:4px 10px;border-radius:var(--radius);transition:background .15s;}
-.topbar-project:hover{background:var(--bg3);}
-.topbar-status{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text3);}
-.topbar-status .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.topbar-btn{padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;transition:all .15s;}
-.topbar-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border2);}
-.topbar-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.topbar-btn.primary:hover{background:var(--accent-dim);}
-
-/* === 主体布局 === */
-.app-body{display:flex;flex:1;overflow:hidden;}
-
-/* === 侧边栏 === */
-.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
-.sidebar-nav{flex:1;overflow-y:auto;padding:8px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;margin-bottom:2px;}
-.nav-item:hover{background:var(--bg3);color:var(--text);}
-.nav-item.active{background:var(--accent);color:#fff;font-weight:600;}
-.nav-item .icon{font-size:16px;width:20px;text-align:center;}
-.nav-item .badge{margin-left:auto;background:var(--bg4);color:var(--text3);font-size:11px;padding:1px 6px;border-radius:10px;min-width:20px;text-align:center;}
-.nav-item.active .badge{background:rgba(255,255,255,.2);color:#fff;}
-.nav-section{padding:6px 14px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:12px;}
-
-/* === 主内容区 === */
-.main-content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
-.panel{display:none;flex:1;overflow:hidden;flex-direction:column;}
-.panel.active{display:flex;}
-.panel-header{padding:16px 24px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--bg);}
-.panel-title{font-size:16px;font-weight:700;color:var(--text);}
-.panel-subtitle{font-size:12px;color:var(--text3);}
-.panel-actions{margin-left:auto;display:flex;gap:8px;}
-.panel-body{flex:1;overflow-y:auto;padding:20px 24px;}
-
-/* === 按钮 === */
-.btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
-.btn:hover{background:var(--bg4);border-color:var(--border2);}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.btn-primary:hover{background:var(--accent-dim);}
-.btn-sm{padding:5px 10px;font-size:12px;}
-.btn-ghost{background:transparent;border-color:transparent;}
-.btn-ghost:hover{background:var(--bg3);}
-.btn-danger{background:var(--red);border-color:var(--red);color:#fff;}
-.btn-danger:hover{opacity:.85;}
-
-/* === 卡片 === */
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;cursor:pointer;transition:all .2s;position:relative;}
-.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow);}
-.card-title{font-size:14px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.card-desc{font-size:12px;color:var(--text3);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
-.card-footer{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
-.tag{padding:2px 8px;border-radius:4px;font-size:11px;background:var(--bg4);color:var(--text2);}
-.tag-accent{background:rgba(99,102,241,.15);color:var(--accent2);}
-.tag-green{background:rgba(16,185,129,.15);color:var(--green);}
-.tag-yellow{background:rgba(245,158,11,.15);color:var(--yellow);}
-.tag-red{background:rgba(239,68,68,.15);color:var(--red);}
-.tag-purple{background:rgba(139,92,207,.15);color:var(--purple);}
-
-/* === 表单 === */
-.form-group{margin-bottom:14px;}
-.form-label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500;}
-.form-input,.form-select,.form-textarea{width:100%;padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;font-family:inherit;transition:border-color .15s;}
-.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);}
-.form-textarea{resize:vertical;min-height:80px;line-height:1.6;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-
-/* === 模态框 === */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.modal-overlay.active{display:flex;}
-.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);width:90%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow);}
-.modal-lg{max-width:800px;}
-.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.modal-title{font-size:15px;font-weight:700;}
-.modal-close{width:28px;height:28px;border-radius:var(--radius);border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
-.modal-close:hover{background:var(--bg4);color:var(--text);}
-.modal-body{padding:20px;overflow-y:auto;flex:1;}
-.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
-
-/* === 统计卡片 === */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;text-align:center;}
-.stat-value{font-size:24px;font-weight:700;color:var(--accent2);}
-.stat-label{font-size:12px;color:var(--text3);margin-top:4px;}
-
-/* === 空状态 === */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text3);}
-.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.5;}
-.empty-state p{font-size:14px;}
-
-/* === Toast === */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:9999;animation:slideIn .3s ease;box-shadow:var(--shadow);}
-@keyframes slideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-
-/* === 情节板 === */
-.plotboard{display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;height:100%;}
-.plot-column{min-width:280px;max-width:320px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);display:flex;flex-direction:column;flex-shrink:0;}
-.plot-col-header{padding:12px 14px;font-weight:600;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.plot-col-header .count{font-size:11px;color:var(--text3);font-weight:400;}
-.plot-col-body{flex:1;overflow-y:auto;padding:8px;}
-.plot-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;cursor:grab;transition:all .15s;}
-.plot-card:hover{border-color:var(--accent);background:var(--bg4);}
-.plot-card-title{font-size:12px;font-weight:600;margin-bottom:4px;}
-.plot-card-desc{font-size:11px;color:var(--text3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.plot-card-meta{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
-
-/* === 时间线 === */
-.timeline-list{position:relative;padding-left:24px;}
-.timeline-list::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border);}
-.timeline-item{position:relative;padding:12px 16px;margin-bottom:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;}
-.timeline-item:hover{border-color:var(--accent);}
-.timeline-item::before{content:'';position:absolute;left:-20px;top:18px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);}
-.timeline-item.major::before{background:var(--yellow);width:12px;height:12px;left:-21px;}
-.timeline-date{font-size:11px;color:var(--text3);margin-bottom:4px;}
-.timeline-title{font-size:13px;font-weight:600;}
-.timeline-desc{font-size:12px;color:var(--text2);margin-top:4px;}
-
-/* === 编辑器 === */
-.editor-layout{display:flex;flex:1;overflow:hidden;}
-.editor-sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:12px;flex-shrink:0;}
-.editor-sidebar-section{margin-bottom:16px;}
-.editor-sidebar-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:0 4px;}
-.editor-sidebar-item{padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text2);transition:background .15s;}
-.editor-sidebar-item:hover{background:var(--bg3);}
-.editor-sidebar-item.active{background:var(--accent);color:#fff;}
-.editor-main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.editor-toolbar{padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg);flex-shrink:0;}
-.editor-info{font-size:12px;color:var(--text3);}
-.editor-area{flex:1;overflow-y:auto;padding:32px 48px;}
-.editor-textarea{width:100%;min-height:100%;border:none;background:transparent;color:var(--text);font-family:var(--font-serif);font-size:16px;line-height:2;resize:none;outline:none;}
-
-/* === 关系图 === */
-.rel-canvas{flex:1;position:relative;overflow:hidden;background:var(--bg);}
-.rel-node{position:absolute;width:80px;height:80px;border-radius:50%;border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;transition:border-color .15s;background:var(--bg2);}
-.rel-node:hover{border-color:var(--accent);z-index:10;}
-.rel-node-name{font-size:11px;font-weight:600;text-align:center;line-height:1.2;}
-.rel-node-role{font-size:9px;color:var(--text3);}
-
-/* === 钩子列表 === */
-.hook-list{display:flex;flex-direction:column;gap:10px;}
-.hook-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all .15s;}
-.hook-item:hover{border-color:var(--accent);}
-.hook-item-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-.hook-item-title{font-size:13px;font-weight:600;flex:1;}
-.hook-item-desc{font-size:12px;color:var(--text3);line-height:1.5;}
-.hook-item-footer{display:flex;gap:8px;margin-top:8px;align-items:center;}
-
-/* === 数据分析 === */
-.chart-container{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:16px;}
-.chart-title{font-size:13px;font-weight:600;margin-bottom:12px;}
-.bar-chart{display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:8px;}
-.bar{background:var(--accent);border-radius:3px 3px 0 0;min-width:20px;flex:1;transition:height .3s;position:relative;}
-.bar:hover{background:var(--accent2);}
-.bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text3);white-space:nowrap;}
-
-/* === 素材库 === */
-.material-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
-.material-item:hover{border-color:var(--accent);}
-.material-type{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
-.material-content{font-size:13px;margin-top:4px;line-height:1.6;}
-
-/* === 反转设计 === */
-.reversal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:12px;cursor:pointer;transition:all .15s;}
-.reversal-card:hover{border-color:var(--purple);}
-.reversal-type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(139,92,207,.15);color:var(--purple);margin-bottom:8px;}
-
-/* === 人物卡片（写作台风格） === */
-.char-card-new{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative;border-left:3px solid var(--accent);}
-.char-card-new:hover{border-color:var(--accent);background:var(--bg3);}
-.char-card-new .char-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.char-card-new .char-role-title{font-size:11px;color:var(--accent2);margin-bottom:6px;}
-.char-card-new .char-tags-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
-.char-card-new .char-tag{font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg4);color:var(--text2);}
-.char-card-new .char-summary{font-size:12px;color:var(--text2);line-height:1.6;}
-.char-card-new .char-details-block{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);}
-.char-card-new.expanded .char-details-block{display:block;}
-.char-detail-row{margin-bottom:5px;line-height:1.6;}
-.char-detail-key{color:var(--accent2);font-weight:600;margin-right:4px;}
-.char-card-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .15s;}
-.char-card-new:hover .char-card-actions{opacity:1;}
-.char-expand-hint{font-size:10px;color:var(--text3);margin-top:6px;}
-.char-panel-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;}
-.char-panel-toolbar .char-count{margin-left:auto;font-size:12px;color:var(--text3);}
-
-/* === 搜索框 === */
-.search-box{position:relative;}
-.search-box input{padding-left:32px;}
-.search-box::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;}
-</style>
+<title>小说工作台</title>
+<link rel="stylesheet" href="novel-studio.css">
 </head>
 <body>
+<div id="app">
 
-<!-- 顶栏 -->
-<div class="topbar">
-  <div class="topbar-logo">📖 小说工作台</div>
-  <div class="topbar-project" id="project-name" onclick="openProjectModal()">未命名作品</div>
-  <div class="topbar-status">
-    <span class="dot" style="background:var(--green)"></span>
-    <span style="font-size:12px;color:var(--green)">本地存储</span>
-    <button class="topbar-btn" onclick="exportBackup()">📤 导出备份</button>
-    <button class="topbar-btn" onclick="importBackup()">📥 导入备份</button>
-  </div>
-</div>
-
-<!-- 主体 -->
-<div class="app-body">
-  <!-- 侧边栏 -->
-  <div class="sidebar">
-    <div class="sidebar-nav">
-      <div class="nav-section">创作</div>
-      <div class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">
-        <span class="icon">🏠</span>仪表盘
-      </div>
-      <div class="nav-item" data-panel="characters" onclick="switchPanel('characters')">
-        <span class="icon">👥</span>人物<span class="badge" id="badge-chars">0</span>
-      </div>
-      <div class="nav-item" data-panel="relations" onclick="switchPanel('relations')">
-        <span class="icon">🕸️</span>关系图谱
-      </div>
-      <div class="nav-item" data-panel="locations" onclick="switchPanel('locations')">
-        <span class="icon">📍</span>地点<span class="badge" id="badge-locs">0</span>
-      </div>
-      <div class="nav-section">结构</div>
-      <div class="nav-item" data-panel="plotboard" onclick="switchPanel('plotboard')">
-        <span class="icon">📋</span>情节板<span class="badge" id="badge-plots">0</span>
-      </div>
-      <div class="nav-item" data-panel="hooks" onclick="switchPanel('hooks')">
-        <span class="icon">🪝</span>钩子伏笔<span class="badge" id="badge-hooks">0</span>
-      </div>
-      <div class="nav-item" data-panel="reversals" onclick="switchPanel('reversals')">
-        <span class="icon">🔄</span>反转设计<span class="badge" id="badge-reversals">0</span>
-      </div>
-      <div class="nav-item" data-panel="timeline" onclick="switchPanel('timeline')">
-        <span class="icon">📅</span>时间线<span class="badge" id="badge-timeline">0</span>
-      </div>
-      <div class="nav-section">写作</div>
-      <div class="nav-item" data-panel="chapters" onclick="switchPanel('chapters')">
-        <span class="icon">📑</span>章节<span class="badge" id="badge-chapters">0</span>
-      </div>
-      <div class="nav-item" data-panel="editor" onclick="switchPanel('editor')">
-        <span class="icon">✍️</span>正文编辑
-      </div>
-      <div class="nav-section">工具</div>
-      <div class="nav-item" data-panel="materials" onclick="switchPanel('materials')">
-        <span class="icon">🗂️</span>素材库<span class="badge" id="badge-materials">0</span>
-      </div>
-      <div class="nav-item" data-panel="analytics" onclick="switchPanel('analytics')">
-        <span class="icon">📊</span>数据分析
-      </div>
+  <!-- 顶部工具栏 -->
+  <div id="toolbar">
+    <span class="brand" id="projectName" onclick="openProjectModal()">📖 小说工作台</span>
+    <div class="toolbar-right">
+      <button class="btn btn-sm" id="btnExport">📤 导出</button>
+      <button class="btn btn-sm" id="btnImport">📥 导入</button>
+      <button class="btn btn-sm btn-primary" id="btnSave">💾 保存</button>
+      <span class="word-count" id="wordCount">本章 0 字</span>
     </div>
   </div>
 
-  <!-- 主内容 -->
-  <div class="main-content">
-    <!-- 仪表盘 -->
-    <div class="panel active" id="panel-dashboard">
-      <div class="panel-header">
-        <div class="panel-title">🏠 仪表盘</div>
-        <div class="panel-subtitle" id="dashboard-subtitle"></div>
+  <!-- 主区域三栏 -->
+  <div id="main">
+
+    <!-- 左侧面板 -->
+    <div id="left-panel">
+      <div class="panel-tabs">
+        <div class="panel-tab active" data-tab="chapters">📑 章节</div>
+        <div class="panel-tab" data-tab="outline">📋 大纲</div>
+        <div class="panel-tab" data-tab="chars">👤 人物</div>
       </div>
-      <div class="panel-body">
-        <div class="stat-grid" id="stat-grid"></div>
-        <div class="card-grid" id="dashboard-grid"></div>
+      <!-- 章节列表 -->
+      <div class="panel-content" id="chaptersContent">
+        <div id="chapterList"></div>
+      </div>
+      <!-- 大纲/工具 -->
+      <div class="panel-content hidden" id="outlineContent">
+        <div id="outlinePanel"></div>
+      </div>
+      <!-- 人物列表 -->
+      <div class="panel-content hidden" id="charsContent">
+        <div id="charList"></div>
       </div>
     </div>
 
-    <!-- 人物管理 -->
-    <div class="panel" id="panel-characters">
-      <div class="panel-header">
-        <div class="panel-title">👥 人物管理</div>
-        <input class="form-input" id="char-search" placeholder="搜索人物..." oninput="renderCharacters()" style="flex:1;max-width:240px;margin-left:16px">
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openCharModal()">+ 新建人物</button></div>
-      </div>
-      <div class="panel-body" style="padding:16px 20px;"><div id="char-grid"></div></div>
-    </div>
-
-    <!-- 关系图谱 -->
-    <div class="panel" id="panel-relations">
-      <div class="panel-header">
-        <div class="panel-title">🕸️ 关系图谱</div>
-        <div class="panel-actions">
-          <button class="btn btn-sm" onclick="openRelModal()">+ 添加关系</button>
-          <button class="btn btn-sm btn-ghost" onclick="autoLayout()">⚡ 自动布局</button>
+    <!-- 中间编辑区 -->
+    <div id="center-panel">
+      <div class="editor-header">
+        <span class="editor-title" id="editorTitle">请从左侧选择章节开始写作</span>
+        <div class="editor-nav">
+          <button class="btn btn-sm" id="btnPrev">◀ 上一章</button>
+          <button class="btn btn-sm" id="btnNext">下一章 ▶</button>
         </div>
       </div>
-      <div class="rel-canvas" id="rel-canvas">
-        <svg id="rel-svg" style="position:absolute;inset:0;pointer-events:none;"></svg>
-        <div id="rel-nodes"></div>
-      </div>
+      <textarea id="editor" placeholder="此处落笔。" spellcheck="false"></textarea>
     </div>
 
-    <!-- 地点管理 -->
-    <div class="panel" id="panel-locations">
-      <div class="panel-header">
-        <div class="panel-title">📍 地点管理</div>
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openLocModal()">+ 新建地点</button></div>
+    <!-- 右侧面板 -->
+    <div id="right-panel">
+      <div class="right-tabs">
+        <div class="right-tab active" data-tab="tools">🗂️ 工具箱</div>
+        <div class="right-tab" data-tab="checker">🔍 风格检查 <span class="badge" id="checkerBadge" style="display:none">0</span></div>
+        <div class="right-tab" data-tab="ai">🤖 AI</div>
       </div>
-      <div class="panel-body"><div class="card-grid" id="loc-grid"></div></div>
-    </div>
-
-    <!-- 情节板 -->
-    <div class="panel" id="panel-plotboard">
-      <div class="panel-header">
-        <div class="panel-title">📋 情节板</div>
-        <div class="panel-actions">
-          <button class="btn btn-primary btn-sm" onclick="openPlotModal()">+ 新建情节</button>
-          <button class="btn btn-sm btn-ghost" onclick="addPlotColumn()">+ 添加列</button>
+      <!-- 工具箱 -->
+      <div class="right-content" id="toolsContent">
+        <div id="toolsPanel"></div>
+      </div>
+      <!-- 风格检查 -->
+      <div class="right-content hidden" id="checkerContent">
+        <div style="padding:4px 0;margin-bottom:4px;">
+          <button class="btn btn-sm btn-primary" id="btnCheck" style="width:100%">重新检查 (Ctrl+L)</button>
+        </div>
+        <div id="checkerResults">
+          <div class="check-empty">编辑区为空，<br>请先写一些内容再检查。</div>
         </div>
       </div>
-      <div class="panel-body" style="overflow-x:auto;overflow-y:hidden;padding:12px;">
-        <div class="plotboard" id="plotboard"></div>
-      </div>
-    </div>
-
-    <!-- 钩子伏笔 -->
-    <div class="panel" id="panel-hooks">
-      <div class="panel-header">
-        <div class="panel-title">🪝 钩子 & 伏笔</div>
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openHookModal()">+ 新建钩子</button></div>
-      </div>
-      <div class="panel-body"><div class="hook-list" id="hook-list"></div></div>
-    </div>
-
-    <!-- 反转设计 -->
-    <div class="panel" id="panel-reversals">
-      <div class="panel-header">
-        <div class="panel-title">🔄 反转设计</div>
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openReversalModal()">+ 新建反转</button></div>
-      </div>
-      <div class="panel-body"><div id="reversal-list"></div></div>
-    </div>
-
-    <!-- 时间线 -->
-    <div class="panel" id="panel-timeline">
-      <div class="panel-header">
-        <div class="panel-title">📅 时间线</div>
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openTimelineModal()">+ 添加事件</button></div>
-      </div>
-      <div class="panel-body"><div class="timeline-list" id="timeline-list"></div></div>
-    </div>
-
-    <!-- 章节管理 -->
-    <div class="panel" id="panel-chapters">
-      <div class="panel-header">
-        <div class="panel-title">📑 章节管理</div>
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openChapterModal()">+ 新建章节</button></div>
-      </div>
-      <div class="panel-body"><div id="chapter-list"></div></div>
-    </div>
-
-    <!-- 正文编辑器 -->
-    <div class="panel" id="panel-editor">
-      <div class="editor-layout">
-        <div class="editor-sidebar" id="editor-sidebar"></div>
-        <div class="editor-main">
-          <div class="editor-toolbar">
-            <span class="editor-info" id="editor-chapter-title">请选择章节</span>
-            <span style="flex:1"></span>
-            <span class="editor-info" id="editor-wordcount">0 字</span>
-            <button class="btn btn-sm btn-ghost" onclick="toggleFocus()">🎯 专注模式</button>
-          </div>
-          <div class="editor-area">
-            <textarea class="editor-textarea" id="editor-textarea" placeholder="选择左侧章节开始写作..." oninput="onEditorInput()"></textarea>
+      <!-- AI助手 -->
+      <div class="right-content hidden" id="aiContent">
+        <div class="ai-chat">
+          <div class="ai-messages" id="aiMessages"></div>
+          <div class="ai-input-area">
+            <div class="ai-presets" id="aiPresets"></div>
+            <div class="ai-input-row">
+              <input type="text" id="aiInput" placeholder="输入指令，或选中文本后点预设…">
+              <button class="btn btn-sm btn-primary" id="btnAiSend">发</button>
+              <button class="btn btn-sm" id="btnAiStop">停</button>
+              <button class="btn btn-sm" id="btnAiInsert">插入</button>
+              <button class="btn btn-sm" id="btnAiClear">清</button>
+            </div>
+            <div class="ai-settings">
+              <div class="ai-settings-row">
+                <label>Ollama</label>
+                <input type="text" id="ollamaUrl" placeholder="http://localhost:11434">
+              </div>
+              <div class="ai-settings-row">
+                <label>模型</label>
+                <input type="text" id="ollamaModel" placeholder="qwen2.5:7b">
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 素材库 -->
-    <div class="panel" id="panel-materials">
-      <div class="panel-header">
-        <div class="panel-title">🗂️ 素材库</div>
-        <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openMaterialModal()">+ 添加素材</button></div>
-      </div>
-      <div class="panel-body"><div id="material-list"></div></div>
-    </div>
+  </div>
 
-    <!-- 数据分析 -->
-    <div class="panel" id="panel-analytics">
-      <div class="panel-header">
-        <div class="panel-title">📊 数据分析</div>
-      </div>
-      <div class="panel-body"><div id="analytics-content"></div></div>
+  <!-- 底部状态栏 -->
+  <div id="statusbar">
+    <div class="status-left">
+      <span><span class="status-dot saved" id="saveDot"></span>已保存</span>
+      <span id="statusChapterWc">本章 0 字</span>
+      <span id="statusTotalWc">总计 0 字</span>
+    </div>
+    <div class="status-right">
+      <span>Ctrl+S 保存</span>
+      <span>Ctrl+J/K 上下章</span>
+      <span>Ctrl+L 检查</span>
+      <span>Ctrl+I AI</span>
     </div>
   </div>
+
 </div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <!-- ===== 模态框 ===== -->
 
-<!-- 项目信息模态框 -->
-<div class="modal-overlay" id="modal-project" onclick="if(event.target===this)closeModal('modal-project')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">📖 项目设置</div><button class="modal-close" onclick="closeModal('modal-project')">✕</button></div>
+<!-- 项目设置 -->
+<div class="modal-overlay" id="modal-project">
+  <div class="modal-box">
+    <div class="modal-header"><span>📖 项目设置</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">作品名称</label><input class="form-input" id="proj-name"></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">作者</label><input class="form-input" id="proj-author"></div>
-        <div class="form-group"><label class="form-label">类型</label><input class="form-input" id="proj-genre" placeholder="如：玄幻·悬疑·单元剧"></div>
-      </div>
-      <div class="form-group"><label class="form-label">简介</label><textarea class="form-textarea" id="proj-desc" rows="4"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">目标字数</label><input class="form-input" id="proj-target" type="number" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">状态</label>
-          <select class="form-select" id="proj-status"><option>构思中</option><option>大纲阶段</option><option>写作中</option><option>修改中</option><option>已完结</option></select>
+      <label>作品名称</label><input id="proj-name" placeholder="未命名作品">
+      <label>作者</label><input id="proj-author">
+      <label>类型/题材</label><input id="proj-genre" placeholder="如：玄幻·悬疑">
+      <label>简介</label><textarea id="proj-desc" rows="3"></textarea>
+      <div class="modal-row">
+        <div><label>目标字数</label><input id="proj-target" type="number" placeholder="0"></div>
+        <div><label>状态</label>
+          <select id="proj-status"><option>构思中</option><option>大纲阶段</option><option>写作中</option><option>修改中</option><option>已完结</option></select>
         </div>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-project')">取消</button><button class="btn btn-primary" onclick="saveProject()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveProject">保存</button></div>
   </div>
 </div>
 
-<!-- 人物模态框 -->
-<div class="modal-overlay" id="modal-char" onclick="if(event.target===this)closeModal('modal-char')">
-  <div class="modal modal-lg">
-    <div class="modal-header"><div class="modal-title" id="char-modal-title">新建人物</div><button class="modal-close" onclick="closeModal('modal-char')">✕</button></div>
+<!-- 章节编辑 -->
+<div class="modal-overlay" id="modal-chapter">
+  <div class="modal-box">
+    <div class="modal-header"><span id="chapterModalTitle">新建章节</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">姓名 *</label><input class="form-input" id="char-name" placeholder="角色名"></div>
-        <div class="form-group"><label class="form-label">身份定位</label><input class="form-input" id="char-title" placeholder="如：主角 / 穿越者"></div>
+      <label>章节标题 *</label><input id="ch-title">
+      <div class="modal-row">
+        <div><label>状态</label>
+          <select id="ch-status"><option value="draft">草稿</option><option value="writing">写作中</option><option value="done">已完成</option><option value="revision">修改中</option></select>
+        </div>
+        <div><label>情绪基调</label>
+          <select id="ch-mood"><option>紧张</option><option>平静</option><option>悲伤</option><option>欢快</option><option>恐惧</option><option>悬疑</option><option>温情</option><option>激烈</option></select>
+        </div>
       </div>
-      <div class="form-group"><label class="form-label">标签 <span style="color:var(--text3);font-weight:400">（逗号分隔，如：28岁，前会计，理性有底线）</span></label><input class="form-input" id="char-tags" placeholder="28岁，前会计，理性有底线"></div>
-      <div class="form-group"><label class="form-label">简介</label><textarea class="form-textarea" id="char-summary" rows="3" placeholder="一两句话概括这个角色"></textarea></div>
-      <div class="form-group"><label class="form-label">详细信息 <span style="color:var(--text3);font-weight:400">（每行一条，"键：值"格式，如：性格：理性有底线）</span></label><textarea class="form-textarea" id="char-details" rows="6" placeholder="性格：理性有底线，吃软不吃硬&#10;能力：通幽、驱神、斩妖&#10;装备：青布道袍、刻字剑&#10;名言：我一个会计，你让我学这？"></textarea></div>
+      <label>涉及人物</label><input id="ch-chars" placeholder="逗号分隔">
+      <label>章节摘要</label><textarea id="ch-summary" rows="3"></textarea>
+      <label>大纲要点</label><textarea id="ch-outline" rows="3" placeholder="本章要完成的事情"></textarea>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-char')">取消</button><button class="btn btn-primary" onclick="saveChar()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveChapter">保存</button></div>
   </div>
 </div>
 
-<!-- 关系模态框 -->
-<div class="modal-overlay" id="modal-rel" onclick="if(event.target===this)closeModal('modal-rel')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">添加关系</div><button class="modal-close" onclick="closeModal('modal-rel')">✕</button></div>
+<!-- 人物编辑 -->
+<div class="modal-overlay" id="modal-char">
+  <div class="modal-box modal-lg">
+    <div class="modal-header"><span id="charModalTitle">新建人物</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">人物A</label><select class="form-select" id="rel-charA"></select></div>
-        <div class="form-group"><label class="form-label">人物B</label><select class="form-select" id="rel-charB"></select></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">关系类型</label>
-          <select class="form-select" id="rel-type"><option>血缘</option><option>爱情</option><option>友情</option><option>仇恨</option><option>师徒</option><option>主仆</option><option>利益</option><option>对手</option><option>自定义</option></select>
+      <div class="modal-row-3">
+        <div><label>姓名 *</label><input id="char-name" placeholder="角色名"></div>
+        <div><label>身份定位</label><input id="char-title" placeholder="如：主角 / 穿越者"></div>
+        <div><label>生死状态</label>
+          <select id="char-status"><option value="alive">存活</option><option value="dead">已故</option><option value="soul">残魂</option><option value="unknown">下落不明</option></select>
         </div>
-        <div class="form-group"><label class="form-label">自定义标签</label><input class="form-input" id="rel-custom"></div>
       </div>
-      <div class="form-group"><label class="form-label">关系描述</label><textarea class="form-textarea" id="rel-desc" rows="2"></textarea></div>
+      <label>标签（逗号分隔）</label><input id="char-tags" placeholder="28岁，前会计，理性有底线">
+      <label>简介</label><textarea id="char-summary" rows="2" placeholder="一两句话概括这个角色"></textarea>
+      <label>详细信息（每行一条，"键：值"格式）</label>
+      <textarea id="char-details" rows="6" placeholder="性格：理性有底线，吃软不吃硬&#10;能力：通幽、驱神、斩妖&#10;装备：青布道袍、刻字剑&#10;名言：我一个会计，你让我学这？"></textarea>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-rel')">取消</button><button class="btn btn-primary" onclick="saveRel()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveChar">保存</button></div>
   </div>
 </div>
 
-<!-- 地点模态框 -->
-<div class="modal-overlay" id="modal-loc" onclick="if(event.target===this)closeModal('modal-loc')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="loc-modal-title">新建地点</div><button class="modal-close" onclick="closeModal('modal-loc')">✕</button></div>
+<!-- 关系编辑 -->
+<div class="modal-overlay" id="modal-rel">
+  <div class="modal-box">
+    <div class="modal-header"><span>添加关系</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">地点名称 *</label><input class="form-input" id="loc-name"></div>
-        <div class="form-group"><label class="form-label">所属区域</label><input class="form-input" id="loc-region"></div>
+      <div class="modal-row">
+        <div><label>人物A</label><select id="rel-charA"></select></div>
+        <div><label>人物B</label><select id="rel-charB"></select></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">类型</label>
-          <select class="form-select" id="loc-type"><option>城市</option><option>村镇</option><option>山林</option><option>水域</option><option>建筑</option><option>洞穴</option><option>道路</option><option>其他</option></select>
+      <div class="modal-row">
+        <div><label>关系类型</label>
+          <select id="rel-type"><option>血缘</option><option>爱情</option><option>友情</option><option>仇恨</option><option>师徒</option><option>主仆</option><option>利益</option><option>对手</option><option>自定义</option></select>
         </div>
-        <div class="form-group"><label class="form-label">氛围</label>
-          <select class="form-select" id="loc-mood"><option>宁静</option><option>压抑</option><option>开阔</option><option>神秘</option><option>温馨</option><option>危险</option><option>繁华</option><option>荒凉</option></select>
-        </div>
+        <div><label>自定义标签</label><input id="rel-custom"></div>
       </div>
-      <div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="loc-desc" rows="3"></textarea></div>
-      <div class="form-group"><label class="form-label">关联事件</label><textarea class="form-textarea" id="loc-events" rows="2"></textarea></div>
+      <label>关系描述</label><textarea id="rel-desc" rows="2"></textarea>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-loc')">取消</button><button class="btn btn-primary" onclick="saveLoc()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveRel">保存</button></div>
   </div>
 </div>
 
-<!-- 情节模态框 -->
-<div class="modal-overlay" id="modal-plot" onclick="if(event.target===this)closeModal('modal-plot')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="plot-modal-title">新建情节</div><button class="modal-close" onclick="closeModal('modal-plot')">✕</button></div>
+<!-- 地点编辑 -->
+<div class="modal-overlay" id="modal-loc">
+  <div class="modal-box">
+    <div class="modal-header"><span id="locModalTitle">新建地点</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">标题 *</label><input class="form-input" id="plot-title"></div>
-        <div class="form-group"><label class="form-label">所属阶段</label><select class="form-select" id="plot-col"></select></div>
+      <div class="modal-row">
+        <div><label>地点名称 *</label><input id="loc-name"></div>
+        <div><label>所属区域</label><input id="loc-region"></div>
       </div>
-      <div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="plot-desc" rows="3"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">涉及人物</label><input class="form-input" id="plot-chars" placeholder="逗号分隔"></div>
-        <div class="form-group"><label class="form-label">情绪基调</label>
-          <select class="form-select" id="plot-mood"><option>紧张</option><option>平静</option><option>悲伤</option><option>欢快</option><option>恐惧</option><option>愤怒</option><option>悬疑</option><option>温情</option></select>
+      <div class="modal-row">
+        <div><label>类型</label>
+          <select id="loc-type"><option>城市</option><option>村镇</option><option>山林</option><option>水域</option><option>建筑</option><option>洞穴</option><option>道路</option><option>其他</option></select>
+        </div>
+        <div><label>氛围</label>
+          <select id="loc-mood"><option>宁静</option><option>压抑</option><option>开阔</option><option>神秘</option><option>温馨</option><option>危险</option><option>繁华</option><option>荒凉</option></select>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">目的/作用</label><input class="form-input" id="plot-purpose"></div>
+      <label>描述</label><textarea id="loc-desc" rows="3"></textarea>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-plot')">取消</button><button class="btn btn-primary" onclick="savePlot()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveLoc">保存</button></div>
   </div>
 </div>
 
-<!-- 钩子模态框 -->
-<div class="modal-overlay" id="modal-hook" onclick="if(event.target===this)closeModal('modal-hook')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="hook-modal-title">新建钩子/伏笔</div><button class="modal-close" onclick="closeModal('modal-hook')">✕</button></div>
+<!-- 钩子编辑 -->
+<div class="modal-overlay" id="modal-hook">
+  <div class="modal-box">
+    <div class="modal-header"><span id="hookModalTitle">新建钩子/伏笔</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">标题 *</label><input class="form-input" id="hook-title"></div>
-        <div class="form-group"><label class="form-label">类型</label>
-          <select class="form-select" id="hook-type"><option>开篇钩子</option><option>悬念</option><option>伏笔</option><option>反转铺垫</option><option>章末钩子</option></select>
+      <div class="modal-row">
+        <div><label>标题 *</label><input id="hook-title"></div>
+        <div><label>类型</label>
+          <select id="hook-type"><option>开篇钩子</option><option>悬念</option><option>伏笔</option><option>反转铺垫</option><option>章末钩子</option></select>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">描述</label><textarea class="form-textarea" id="hook-desc" rows="3"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">埋设章节</label><input class="form-input" id="hook-plant" placeholder="如：第3章"></div>
-        <div class="form-group"><label class="form-label">回收章节</label><input class="form-input" id="hook-harvest" placeholder="如：第8章"></div>
+      <label>描述</label><textarea id="hook-desc" rows="3"></textarea>
+      <div class="modal-row">
+        <div><label>埋设章节</label><input id="hook-plant" placeholder="如：第3章"></div>
+        <div><label>回收章节</label><input id="hook-harvest" placeholder="如：第8章"></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">状态</label>
-          <select class="form-select" id="hook-status"><option value="open">未解答</option><option value="closed">已解答</option><option value="intentional">故意留白</option></select>
+      <div class="modal-row">
+        <div><label>状态</label>
+          <select id="hook-status"><option value="open">未解答</option><option value="closed">已解答</option><option value="intentional">故意留白</option></select>
         </div>
-        <div class="form-group"><label class="form-label">重要程度</label>
-          <select class="form-select" id="hook-priority"><option>高</option><option>中</option><option>低</option></select>
+        <div><label>重要程度</label>
+          <select id="hook-priority"><option>高</option><option>中</option><option>低</option></select>
         </div>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-hook')">取消</button><button class="btn btn-primary" onclick="saveHook()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveHook">保存</button></div>
   </div>
 </div>
 
-<!-- 反转模态框 -->
-<div class="modal-overlay" id="modal-reversal" onclick="if(event.target===this)closeModal('modal-reversal')">
-  <div class="modal modal-lg">
-    <div class="modal-header"><div class="modal-title" id="reversal-modal-title">新建反转</div><button class="modal-close" onclick="closeModal('modal-reversal')">✕</button></div>
+<!-- 反转编辑 -->
+<div class="modal-overlay" id="modal-reversal">
+  <div class="modal-box modal-lg">
+    <div class="modal-header"><span id="reversalModalTitle">新建反转</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">反转标题 *</label><input class="form-input" id="rev-title"></div>
-        <div class="form-group"><label class="form-label">反转类型</label>
-          <select class="form-select" id="rev-type"><option>身份反转</option><option>动机反转</option><option>事实反转</option><option>关系反转</option><option>时间反转</option><option>认知反转</option></select>
+      <div class="modal-row">
+        <div><label>反转标题 *</label><input id="rev-title"></div>
+        <div><label>反转类型</label>
+          <select id="rev-type"><option>身份反转</option><option>动机反转</option><option>事实反转</option><option>关系反转</option><option>时间反转</option><option>认知反转</option></select>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">反转内容</label><textarea class="form-textarea" id="rev-content" rows="3" placeholder="读者以为是A，实际是B"></textarea></div>
-      <div class="form-group"><label class="form-label">铺垫清单</label><textarea class="form-textarea" id="rev-foreshadow" rows="3" placeholder="每行一条铺垫，确保反转有据可查"></textarea></div>
-      <div class="form-group"><label class="form-label">读者预期管理</label><textarea class="form-textarea" id="rev-expectation" rows="2" placeholder="如何引导读者形成错误预期"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">触发章节</label><input class="form-input" id="rev-chapter" placeholder="如：第10章"></div>
-        <div class="form-group"><label class="form-label">关联人物</label><input class="form-input" id="rev-chars" placeholder="逗号分隔"></div>
+      <label>反转内容</label><textarea id="rev-content" rows="3" placeholder="读者以为是A，实际是B"></textarea>
+      <label>铺垫清单（每行一条）</label><textarea id="rev-foreshadow" rows="3" placeholder="确保反转有据可查"></textarea>
+      <div class="modal-row">
+        <div><label>触发章节</label><input id="rev-chapter" placeholder="如：第10章"></div>
+        <div><label>关联人物</label><input id="rev-chars" placeholder="逗号分隔"></div>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-reversal')">取消</button><button class="btn btn-primary" onclick="saveReversal()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveReversal">保存</button></div>
   </div>
 </div>
 
-<!-- 时间线模态框 -->
-<div class="modal-overlay" id="modal-timeline" onclick="if(event.target===this)closeModal('modal-timeline')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="timeline-modal-title">添加事件</div><button class="modal-close" onclick="closeModal('modal-timeline')">✕</button></div>
+<!-- 时间线事件编辑 -->
+<div class="modal-overlay" id="modal-timeline">
+  <div class="modal-box">
+    <div class="modal-header"><span id="timelineModalTitle">添加事件</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">时间 *</label><input class="form-input" id="tl-time" placeholder="如：建安十三年春"></div>
-        <div class="form-group"><label class="form-label">重要程度</label>
-          <select class="form-select" id="tl-level"><option value="major">重大事件</option><option value="normal">普通事件</option><option value="minor">次要事件</option></select>
+      <div class="modal-row">
+        <div><label>时间 *</label><input id="tl-time" placeholder="如：建安十三年春"></div>
+        <div><label>重要程度</label>
+          <select id="tl-level"><option value="major">重大事件</option><option value="normal">普通事件</option><option value="minor">次要事件</option></select>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">事件标题 *</label><input class="form-input" id="tl-title"></div>
-      <div class="form-group"><label class="form-label">事件描述</label><textarea class="form-textarea" id="tl-desc" rows="3"></textarea></div>
-      <div class="form-group"><label class="form-label">涉及人物</label><input class="form-input" id="tl-chars" placeholder="逗号分隔"></div>
+      <label>事件标题 *</label><input id="tl-title">
+      <label>事件描述</label><textarea id="tl-desc" rows="3"></textarea>
+      <label>涉及人物</label><input id="tl-chars" placeholder="逗号分隔">
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-timeline')">取消</button><button class="btn btn-primary" onclick="saveTimeline()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveTimeline">保存</button></div>
   </div>
 </div>
 
-<!-- 章节模态框 -->
-<div class="modal-overlay" id="modal-chapter" onclick="if(event.target===this)closeModal('modal-chapter')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="chapter-modal-title">新建章节</div><button class="modal-close" onclick="closeModal('modal-chapter')">✕</button></div>
+<!-- 素材编辑 -->
+<div class="modal-overlay" id="modal-material">
+  <div class="modal-box">
+    <div class="modal-header"><span id="materialModalTitle">添加素材</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">章节标题 *</label><input class="form-input" id="ch-title"></div>
-        <div class="form-group"><label class="form-label">状态</label>
-          <select class="form-select" id="ch-status"><option value="draft">草稿</option><option value="writing">写作中</option><option value="done">已完成</option><option value="revision">修改中</option></select>
+      <div class="modal-row">
+        <div><label>类型</label>
+          <select id="mat-type"><option>灵感</option><option>金句</option><option>意象</option><option>参考</option><option>笔记</option><option>对话</option></select>
         </div>
+        <div><label>标签</label><input id="mat-tags" placeholder="逗号分隔"></div>
       </div>
-      <div class="form-group"><label class="form-label">章节摘要</label><textarea class="form-textarea" id="ch-summary" rows="3"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">涉及人物</label><input class="form-input" id="ch-chars" placeholder="逗号分隔"></div>
-        <div class="form-group"><label class="form-label">情绪基调</label>
-          <select class="form-select" id="ch-mood"><option>紧张</option><option>平静</option><option>悲伤</option><option>欢快</option><option>恐惧</option><option>悬疑</option><option>温情</option><option>激烈</option></select>
-        </div>
-      </div>
-      <div class="form-group"><label class="form-label">大纲要点</label><textarea class="form-textarea" id="ch-outline" rows="3" placeholder="本章要完成的事情"></textarea></div>
+      <label>内容 *</label><textarea id="mat-content" rows="5"></textarea>
+      <label>来源/备注</label><input id="mat-source">
     </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-chapter')">取消</button><button class="btn btn-primary" onclick="saveChapter()">保存</button></div>
+    <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveMaterial">保存</button></div>
   </div>
 </div>
 
-<!-- 素材模态框 -->
-<div class="modal-overlay" id="modal-material" onclick="if(event.target===this)closeModal('modal-material')">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="material-modal-title">添加素材</div><button class="modal-close" onclick="closeModal('modal-material')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">类型</label>
-          <select class="form-select" id="mat-type"><option>灵感</option><option>金句</option><option>意象</option><option>参考</option><option>笔记</option><option>对话</option></select>
-        </div>
-        <div class="form-group"><label class="form-label">标签</label><input class="form-input" id="mat-tags" placeholder="逗号分隔"></div>
-      </div>
-      <div class="form-group"><label class="form-label">内容 *</label><textarea class="form-textarea" id="mat-content" rows="5"></textarea></div>
-      <div class="form-group"><label class="form-label">来源/备注</label><input class="form-input" id="mat-source"></div>
-    </div>
-    <div class="modal-footer"><button class="btn" onclick="closeModal('modal-material')">取消</button><button class="btn btn-primary" onclick="saveMaterial()">保存</button></div>
-  </div>
-</div>
-
-<script>
-// ===== 全局状态 =====
-let DB = {
-  project: {name:'未命名作品',author:'',genre:'',desc:'',targetWords:0,startDate:'',status:'构思中'},
-  characters: [],
-  relations: [],
-  locations: [],
-  plots: {columns:['第一幕·起','第二幕·承','第三幕·转','第四幕·合'],cards:[]},
-  hooks: [],
-  reversals: [],
-  timeline: [],
-  chapters: [],
-  materials: [],
-  settings: {theme:'dark',autoSave:true,fontSize:16,editorFont:'serif'}
-};
-let relPositions = {};
-let currentPanel = 'dashboard';
-let editingId = null;
-let currentChapterId = null;
-let autoSaveTimer = null;
-let focusMode = false;
-
-// ===== 工具函数 =====
-const $ = id => document.getElementById(id);
-const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2,6);
-
-function showToast(msg) {
-  const old = document.querySelector('.toast');
-  if(old) old.remove();
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2800);
-}
-
-function closeModal(id) { $(id).classList.remove('active'); editingId = null; }
-function openModal(id) { $(id).classList.add('active'); }
-
-// ===== 面板切换 =====
-function switchPanel(name) {
-  currentPanel = name;
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.panel === name));
-  document.querySelectorAll('.panel').forEach(el => el.classList.toggle('active', el.id === 'panel-' + name));
-  // 渲染对应面板
-  const renderers = {
-    dashboard: renderDashboard,
-    characters: renderCharacters,
-    relations: renderRelations,
-    locations: renderLocations,
-    plotboard: renderPlotboard,
-    hooks: renderHooks,
-    reversals: renderReversals,
-    timeline: renderTimeline,
-    chapters: renderChapters,
-    editor: renderEditor,
-    materials: renderMaterials,
-    analytics: renderAnalytics
-  };
-  renderers[name]?.();
-}
-
-// ===== localStorage 存储 =====
-function autoSave(key) {
-  clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(() => {
-    try { localStorage.setItem('novel_' + key, JSON.stringify(DB[key])); } catch(e) {}
-  }, 300);
-}
-
-function saveAll() {
-  const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-  keys.forEach(key => {
-    try { localStorage.setItem('novel_' + key, JSON.stringify(DB[key])); } catch(e) {}
-  });
-  showToast('💾 已保存到本地');
-}
-
-function exportBackup() {
-  const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-  const data = {};
-  keys.forEach(k => data[k] = DB[k]);
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${DB.project.name||'小说'}_备份_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('📤 备份已导出');
-}
-
-function importBackup() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-        keys.forEach(k => { if (data[k] !== undefined) DB[k] = data[k]; });
-        saveAll();
-        updateProjectName();
-        updateBadges();
-        switchPanel('dashboard');
-        showToast('📥 备份已导入 ✓');
-      } catch(e) {
-        showToast('❌ 导入失败，文件格式有误');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-// ===== 项目信息 =====
-function updateProjectName() {
-  $('project-name').textContent = DB.project.name || '未命名作品';
-  document.title = `📖 ${DB.project.name || '小说工作台'}`;
-}
-
-function openProjectModal() {
-  $('proj-name').value = DB.project.name || '';
-  $('proj-author').value = DB.project.author || '';
-  $('proj-genre').value = DB.project.genre || '';
-  $('proj-desc').value = DB.project.desc || '';
-  $('proj-target').value = DB.project.targetWords || '';
-  $('proj-status').value = DB.project.status || '构思中';
-  openModal('modal-project');
-}
-
-function saveProject() {
-  DB.project.name = $('proj-name').value.trim() || '未命名作品';
-  DB.project.author = $('proj-author').value.trim();
-  DB.project.genre = $('proj-genre').value.trim();
-  DB.project.desc = $('proj-desc').value.trim();
-  DB.project.targetWords = parseInt($('proj-target').value) || 0;
-  DB.project.status = $('proj-status').value;
-  updateProjectName();
-  autoSave('project');
-  closeModal('modal-project');
-  showToast('✅ 项目信息已保存');
-}
-
-// ===== 仪表盘 =====
-function renderDashboard() {
-  const totalWords = DB.chapters.reduce((s, c) => s + (c.wordCount || 0), 0);
-  const doneChapters = DB.chapters.filter(c => c.status === 'done').length;
-  const openHooks = DB.hooks.filter(h => h.status === 'open').length;
-  
-  $('dashboard-subtitle').textContent = DB.project.status ? `状态：${DB.project.status}` : '';
-  
-  $('stat-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${DB.characters.length}</div><div class="stat-label">👥 人物</div></div>
-    <div class="stat-card"><div class="stat-value">${DB.locations.length}</div><div class="stat-label">📍 地点</div></div>
-    <div class="stat-card"><div class="stat-value">${DB.plots.cards?.length || 0}</div><div class="stat-label">📋 情节</div></div>
-    <div class="stat-card"><div class="stat-value">${openHooks}</div><div class="stat-label">🪝 待解答</div></div>
-    <div class="stat-card"><div class="stat-value">${DB.chapters.length}</div><div class="stat-label">📑 章节</div></div>
-    <div class="stat-card"><div class="stat-value">${doneChapters}/${DB.chapters.length}</div><div class="stat-label">✅ 已完成</div></div>
-    <div class="stat-card"><div class="stat-value">${totalWords.toLocaleString()}</div><div class="stat-label">✍️ 总字数</div></div>
-    <div class="stat-card"><div class="stat-value">${DB.reversals.length}</div><div class="stat-label">🔄 反转</div></div>
-  `;
-  
-  // 快捷面板
-  const recentChapters = DB.chapters.slice(-5).reverse();
-  const pendingHooks = DB.hooks.filter(h => h.status === 'open').slice(0, 5);
-  
-  $('dashboard-grid').innerHTML = `
-    <div class="card" style="cursor:default">
-      <div class="card-title">📑 最近章节</div>
-      ${recentChapters.length ? recentChapters.map((c, i) => `
-        <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:center;gap:8px">
-          <span style="color:var(--accent2);font-weight:600">第${DB.chapters.indexOf(c)+1}章</span>
-          <span style="flex:1;color:var(--text2)">${c.title}</span>
-          <span class="tag tag-${c.status==='done'?'green':c.status==='writing'?'accent':'yellow'}">${{draft:'草稿',writing:'写作中',done:'已完成',revision:'修改中'}[c.status]||'草稿'}</span>
-        </div>
-      `).join('') : '<div style="color:var(--text3);font-size:12px;padding:8px 0">暂无章节</div>'}
-    </div>
-    <div class="card" style="cursor:default">
-      <div class="card-title">🪝 待解答钩子</div>
-      ${pendingHooks.length ? pendingHooks.map(h => `
-        <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:center;gap:8px">
-          <span style="color:var(--yellow)">●</span>
-          <span style="flex:1;color:var(--text2)">${h.title}</span>
-          <span style="font-size:11px;color:var(--text3)">${h.plant||''}</span>
-        </div>
-      `).join('') : '<div style="color:var(--text3);font-size:12px;padding:8px 0">暂无</div>'}
-    </div>
-    <div class="card" style="cursor:default">
-      <div class="card-title">👥 核心人物</div>
-      ${DB.characters.filter(c=>c.role==='主角'||c.role==='反派').slice(0,6).map(c => `
-        <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:center;gap:8px">
-          <span style="width:8px;height:8px;border-radius:50%;background:${c.color||'var(--accent)'};flex-shrink:0"></span>
-          <span style="flex:1;font-weight:500">${c.name}</span>
-          <span style="font-size:11px;color:var(--text3)">${c.role}</span>
-        </div>
-      `).join('') || '<div style="color:var(--text3);font-size:12px;padding:8px 0">暂无</div>'}
-    </div>
-  `;
-}
-
-// ===== 人物管理 =====
-function renderCharacters() {
-  const search = ($('char-search')?.value || '').toLowerCase();
-  const chars = DB.characters.filter(c =>
-    c.name.toLowerCase().includes(search) ||
-    (c.title||'').toLowerCase().includes(search) ||
-    (c.summary||'').toLowerCase().includes(search)
-  );
-  const grid = $('char-grid');
-  if (!chars.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">👤</div><p>还没有人物，点击右上角新建</p></div>`;
-    return;
-  }
-  // 列表模式（写作台风格）
-  grid.style.display = 'block';
-  grid.innerHTML = chars.map(c => {
-    const color = c.color || '#6366f1';
-    const tags = Array.isArray(c.tags) ? c.tags : (c.tags||'').split(/[，,]/).filter(Boolean);
-    // 兼容旧字段：把旧字段合并成details
-    let details = c.details || {};
-    if (typeof details === 'string') {
-      // 解析键值对文本
-      details = {};
-      c.details.split('\n').forEach(line => {
-        const idx = line.indexOf('：');
-        if (idx > 0) details[line.slice(0,idx).trim()] = line.slice(idx+1).trim();
-      });
-    }
-    // 兼容旧字段
-    if (!Object.keys(details).length) {
-      if (c.appearance) details['外貌'] = c.appearance;
-      if (c.personality) details['性格'] = c.personality;
-      if (c.goal) details['目标'] = c.goal;
-      if (c.desire) details['欲望'] = c.desire;
-      if (c.secret) details['秘密'] = c.secret;
-      if (c.arc) details['成长弧线'] = c.arc;
-      if (c.notes) details['备注'] = c.notes;
-    }
-    const detailsHtml = Object.entries(details).map(([k,v]) => {
-      const val = Array.isArray(v) ? v.join('；') : v;
-      return `<div class="char-detail-row"><span class="char-detail-key">${k}：</span>${val}</div>`;
-    }).join('');
-    const hasDetails = Object.keys(details).length > 0;
-    return `
-    <div class="char-card-new" onclick="toggleCharCard(this)" data-id="${c.id}">
-      <div class="char-card-actions">
-        <button class="btn btn-sm" onclick="event.stopPropagation();openCharModal('${c.id}')">✎</button>
-        <button class="btn btn-sm" style="color:var(--red)" onclick="event.stopPropagation();deleteChar('${c.id}')">✕</button>
-      </div>
-      <div class="char-name">${c.name}</div>
-      <div class="char-role-title">${c.title||c.role||''}</div>
-      ${tags.length ? `<div class="char-tags-row">${tags.map(t=>`<span class="char-tag">${t}</span>`).join('')}</div>` : ''}
-      ${c.summary ? `<div class="char-summary">${c.summary}</div>` : ''}
-      ${hasDetails ? `<div class="char-details-block">${detailsHtml}</div><div class="char-expand-hint">▼ 点击展开详情</div>` : ''}
-    </div>`;
-  }).join('');
-  // 根据颜色设置左边框
-  grid.querySelectorAll('.char-card-new').forEach(card => {
-    const id = card.dataset.id;
-    const c = DB.characters.find(x => x.id === id);
-    if (c && c.color) card.style.borderLeftColor = c.color;
-  });
-}
-
-function toggleCharCard(card) {
-  card.classList.toggle('expanded');
-  const hint = card.querySelector('.char-expand-hint');
-  if (hint) hint.textContent = card.classList.contains('expanded') ? '▲ 收起' : '▼ 点击展开详情';
-}
-
-function openCharModal(id) {
-  editingId = id || null;
-  $('char-modal-title').textContent = id ? '编辑人物' : '新建人物';
-  if (id) {
-    const c = DB.characters.find(x => x.id === id);
-    if (!c) return;
-    $('char-name').value = c.name || '';
-    $('char-title').value = c.title || c.role || '';
-    // 标签
-    const tags = Array.isArray(c.tags) ? c.tags : (c.tags||'').split(/[，,]/).filter(Boolean);
-    $('char-tags').value = tags.join('，');
-    $('char-summary').value = c.summary || '';
-    // 详情：兼容旧字段
-    let details = c.details || {};
-    if (!Object.keys(details).length) {
-      if (c.appearance) details['外貌'] = c.appearance;
-      if (c.personality) details['性格'] = c.personality;
-      if (c.goal) details['目标'] = c.goal;
-      if (c.desire) details['欲望'] = c.desire;
-      if (c.secret) details['秘密'] = c.secret;
-      if (c.arc) details['成长弧线'] = c.arc;
-      if (c.notes) details['备注'] = c.notes;
-    }
-    const detailsText = Object.entries(details).map(([k,v]) => {
-      const val = Array.isArray(v) ? v.join('；') : v;
-      return `${k}：${val}`;
-    }).join('\n');
-    $('char-details').value = detailsText;
-  } else {
-    $('char-name').value = '';
-    $('char-title').value = '';
-    $('char-tags').value = '';
-    $('char-summary').value = '';
-    $('char-details').value = '';
-  }
-  openModal('modal-char');
-  setTimeout(() => $('char-name').focus(), 100);
-}
-
-function saveChar() {
-  const name = $('char-name').value.trim();
-  if (!name) { showToast('请输入人物姓名'); return; }
-  // 解析详情文本
-  const detailsText = $('char-details').value.trim();
-  const details = {};
-  if (detailsText) {
-    detailsText.split('\n').forEach(line => {
-      const idx = line.indexOf('：');
-      if (idx > 0) {
-        details[line.slice(0,idx).trim()] = line.slice(idx+1).trim();
-      } else {
-        const idx2 = line.indexOf(':');
-        if (idx2 > 0) details[line.slice(0,idx2).trim()] = line.slice(idx2+1).trim();
-      }
-    });
-  }
-  const tags = $('char-tags').value.split(/[，,]/).map(t=>t.trim()).filter(Boolean);
-  const cd = {
-    name,
-    title: $('char-title').value.trim(),
-    tags,
-    summary: $('char-summary').value.trim(),
-    details,
-    color: (editingId ? (DB.characters.find(x=>x.id===editingId)||{}).color : null) || '#6366f1',
-  };
-  if (editingId) {
-    const i = DB.characters.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.characters[i] = { ...DB.characters[i], ...cd };
-  } else {
-    DB.characters.push({ id: genId(), ...cd });
-  }
-  autoSave('characters');
-  closeModal('modal-char');
-  renderCharacters();
-  updateBadges();
-  showToast(editingId ? '人物已更新 ✓' : '人物已创建 ✓');
-}
-
-function deleteChar(id) {
-  if (!confirm('确定删除该人物？')) return;
-  DB.characters = DB.characters.filter(c => c.id !== id);
-  DB.relations = DB.relations.filter(r => r.charA !== id && r.charB !== id);
-  autoSave('characters');
-  autoSave('relations');
-  renderCharacters();
-  updateBadges();
-  showToast('人物已删除');
-}
-
-// ===== 关系图谱 =====
-function renderRelations() {
-  const canvas = $('rel-canvas');
-  const nodes = $('rel-nodes');
-  const svg = $('rel-svg');
-  nodes.innerHTML = '';
-  svg.innerHTML = '';
-  if (!DB.characters.length) {
-    nodes.innerHTML = '<div class="empty-state" style="position:absolute;inset:0"><div class="icon">🕸️</div><p>先创建人物再来建立关系</p></div>';
-    return;
-  }
-  const W = canvas.clientWidth || 800, H = canvas.clientHeight || 500;
-  DB.characters.forEach((c, i) => {
-    if (!relPositions[c.id]) {
-      const a = (i / DB.characters.length) * Math.PI * 2, r = Math.min(W, H) * 0.32;
-      relPositions[c.id] = { x: W/2 + r*Math.cos(a) - 40, y: H/2 + r*Math.sin(a) - 40 };
-    }
-  });
-  svg.setAttribute('width', W);
-  svg.setAttribute('height', H);
-  // 画线
-  DB.relations.forEach(rel => {
-    const pA = relPositions[rel.charA], pB = relPositions[rel.charB];
-    if (!pA || !pB) return;
-    const ax=pA.x+40, ay=pA.y+40, bx=pB.x+40, by=pB.y+40;
-    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1',ax);line.setAttribute('y1',ay);line.setAttribute('x2',bx);line.setAttribute('y2',by);
-    line.setAttribute('stroke','#3a3f55');line.setAttribute('stroke-width','1.5');
-    svg.appendChild(line);
-    const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
-    lbl.setAttribute('x',(ax+bx)/2);lbl.setAttribute('y',(ay+by)/2-5);
-    lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill','#6b7394');lbl.setAttribute('font-size','10');
-    lbl.textContent = rel.type==='自定义' ? (rel.custom||rel.type) : rel.type;
-    svg.appendChild(lbl);
-  });
-  // 画节点
-  DB.characters.forEach(c => {
-    const pos = relPositions[c.id];
-    const node = document.createElement('div');
-    node.className = 'rel-node';
-    node.style.cssText = `left:${pos.x}px;top:${pos.y}px;border-color:${c.color||'var(--border)'};`;
-    node.innerHTML = `<div class="rel-node-name">${c.name}</div><div class="rel-node-role">${c.role||''}</div>`;
-    node.dataset.id = c.id;
-    node.addEventListener('mousedown', startDragNode);
-    nodes.appendChild(node);
-  });
-}
-
-function startDragNode(e) {
-  e.preventDefault();
-  const node = e.currentTarget, id = node.dataset.id, pos = relPositions[id];
-  const ox = e.clientX - pos.x, oy = e.clientY - pos.y;
-  const onMove = ev => {
-    const canvas = $('rel-canvas'), rect = canvas.getBoundingClientRect();
-    relPositions[id] = { x: Math.max(0, Math.min(rect.width-80, ev.clientX-rect.left-40)), y: Math.max(0, Math.min(rect.height-80, ev.clientY-rect.top-40)) };
-    node.style.left = relPositions[id].x + 'px';
-    node.style.top = relPositions[id].y + 'px';
-    updateRelLines();
-  };
-  const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
-}
-
-function updateRelLines() {
-  const svg = $('rel-svg'), canvas = $('rel-canvas');
-  svg.innerHTML = '';
-  svg.setAttribute('width', canvas.clientWidth);
-  svg.setAttribute('height', canvas.clientHeight);
-  DB.relations.forEach(rel => {
-    const pA = relPositions[rel.charA], pB = relPositions[rel.charB];
-    if (!pA || !pB) return;
-    const ax=pA.x+40, ay=pA.y+40, bx=pB.x+40, by=pB.y+40;
-    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1',ax);line.setAttribute('y1',ay);line.setAttribute('x2',bx);line.setAttribute('y2',by);
-    line.setAttribute('stroke','#3a3f55');line.setAttribute('stroke-width','1.5');
-    svg.appendChild(line);
-    const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
-    lbl.setAttribute('x',(ax+bx)/2);lbl.setAttribute('y',(ay+by)/2-5);
-    lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill','#6b7394');lbl.setAttribute('font-size','10');
-    lbl.textContent = rel.type==='自定义' ? (rel.custom||rel.type) : rel.type;
-    svg.appendChild(lbl);
-  });
-}
-
-function autoLayout() {
-  const canvas = $('rel-canvas'), W = canvas.clientWidth||800, H = canvas.clientHeight||500;
-  DB.characters.forEach((c, i) => {
-    const a = (i / DB.characters.length) * Math.PI * 2, r = Math.min(W, H) * 0.32;
-    relPositions[c.id] = { x: W/2 + r*Math.cos(a) - 40, y: H/2 + r*Math.sin(a) - 40 };
-  });
-  renderRelations();
-}
-
-function openRelModal() {
-  if (!DB.characters.length) { showToast('请先创建人物'); return; }
-  const opts = DB.characters.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-  $('rel-charA').innerHTML = opts;
-  $('rel-charB').innerHTML = opts;
-  if (DB.characters.length > 1) $('rel-charB').selectedIndex = 1;
-  $('rel-type').value = '友情';
-  $('rel-custom').value = '';
-  $('rel-desc').value = '';
-  openModal('modal-rel');
-}
-
-function saveRel() {
-  const cA = $('rel-charA').value, cB = $('rel-charB').value;
-  if (cA === cB) { showToast('不能选择同一个人物'); return; }
-  DB.relations.push({ id: genId(), charA: cA, charB: cB, type: $('rel-type').value, custom: $('rel-custom').value.trim(), desc: $('rel-desc').value.trim() });
-  autoSave('relations');
-  closeModal('modal-rel');
-  renderRelations();
-  showToast('关系已添加');
-}
-
-// ===== 地点管理 =====
-function renderLocations() {
-  const grid = $('loc-grid');
-  if (!DB.locations.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">📍</div><p>还没有地点，点击右上角新建</p></div>';
-    return;
-  }
-  const moodColors = {压抑:'var(--text3)',开阔:'var(--blue)',神秘:'var(--purple)',温馨:'var(--yellow)',危险:'var(--red)',宁静:'var(--green)',繁华:'var(--orange)',荒凉:'var(--text3)'};
-  grid.innerHTML = DB.locations.map(l => `
-    <div class="card" onclick="openLocModal('${l.id}')">
-      <div class="card-title">📍 ${l.name}</div>
-      <div class="card-tags">
-        <span class="tag">${l.type||'未分类'}</span>
-        ${l.mood?`<span class="tag" style="color:${moodColors[l.mood]||'var(--text2)'}">${l.mood}</span>`:''}
-        ${l.region?`<span class="tag">${l.region}</span>`:''}
-      </div>
-      ${l.desc?`<div class="card-desc" style="margin-top:8px">${l.desc.substring(0,100)}${l.desc.length>100?'...':''}</div>`:''}
-      <div class="card-footer">
-        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openLocModal('${l.id}')">✏️</button>
-        <button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="event.stopPropagation();deleteLoc('${l.id}')">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openLocModal(id) {
-  editingId = id || null;
-  $('loc-modal-title').textContent = id ? '编辑地点' : '新建地点';
-  if (id) {
-    const l = DB.locations.find(x => x.id === id);
-    if (!l) return;
-    $('loc-name').value = l.name||''; $('loc-region').value = l.region||'';
-    $('loc-type').value = l.type||'城市'; $('loc-mood').value = l.mood||'宁静';
-    $('loc-desc').value = l.desc||''; $('loc-events').value = l.events||'';
-  } else {
-    ['loc-name','loc-region','loc-desc','loc-events'].forEach(f => $(f).value = '');
-    $('loc-type').value = '城市'; $('loc-mood').value = '宁静';
-  }
-  openModal('modal-loc');
-}
-
-function saveLoc() {
-  const name = $('loc-name').value.trim();
-  if (!name) { showToast('请输入地点名称'); return; }
-  const ld = { name, region: $('loc-region').value.trim(), type: $('loc-type').value, mood: $('loc-mood').value, desc: $('loc-desc').value.trim(), events: $('loc-events').value.trim() };
-  if (editingId) {
-    const i = DB.locations.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.locations[i] = { ...DB.locations[i], ...ld };
-  } else {
-    DB.locations.push({ id: genId(), ...ld });
-  }
-  autoSave('locations');
-  closeModal('modal-loc');
-  renderLocations();
-  updateBadges();
-  showToast(editingId ? '地点已更新' : '地点已创建');
-}
-
-function deleteLoc(id) {
-  if (!confirm('确定删除？')) return;
-  DB.locations = DB.locations.filter(l => l.id !== id);
-  autoSave('locations');
-  renderLocations();
-  updateBadges();
-}
-
-// ===== 情节板 =====
-function renderPlotboard() {
-  const board = $('plotboard');
-  const columns = DB.plots.columns || [];
-  const cards = DB.plots.cards || [];
-  board.innerHTML = columns.map(col => {
-    const colCards = cards.filter(c => c.col === col);
-    return `
-      <div class="plot-column">
-        <div class="plot-col-header"><span>${col}</span><span class="count">${colCards.length}</span></div>
-        <div class="plot-col-body">
-          ${colCards.map(c => `
-            <div class="plot-card" onclick="openPlotModal('${c.id}')">
-              <div class="plot-card-title">${c.title}</div>
-              ${c.desc?`<div class="plot-card-desc">${c.desc}</div>`:''}
-              <div class="plot-card-meta">
-                ${c.mood?`<span class="tag" style="font-size:10px">${c.mood}</span>`:''}
-                ${c.chars?`<span class="tag tag-accent" style="font-size:10px">${c.chars}</span>`:''}
-              </div>
-            </div>
-          `).join('')}
-          ${!colCards.length?'<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px">空</div>':''}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function openPlotModal(id) {
-  editingId = id || null;
-  $('plot-modal-title').textContent = id ? '编辑情节' : '新建情节';
-  // 填充列选项
-  $('plot-col').innerHTML = (DB.plots.columns||[]).map(c => `<option>${c}</option>`).join('');
-  if (id) {
-    const c = (DB.plots.cards||[]).find(x => x.id === id);
-    if (!c) return;
-    $('plot-title').value = c.title||''; $('plot-col').value = c.col||'';
-    $('plot-desc').value = c.desc||''; $('plot-chars').value = c.chars||'';
-    $('plot-mood').value = c.mood||'紧张'; $('plot-purpose').value = c.purpose||'';
-  } else {
-    ['plot-title','plot-desc','plot-chars','plot-purpose'].forEach(f => $(f).value = '');
-    $('plot-mood').value = '紧张';
-  }
-  openModal('modal-plot');
-}
-
-function savePlot() {
-  const title = $('plot-title').value.trim();
-  if (!title) { showToast('请输入标题'); return; }
-  const pd = { title, col: $('plot-col').value, desc: $('plot-desc').value.trim(), chars: $('plot-chars').value.trim(), mood: $('plot-mood').value, purpose: $('plot-purpose').value.trim() };
-  if (!DB.plots.cards) DB.plots.cards = [];
-  if (editingId) {
-    const i = DB.plots.cards.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.plots.cards[i] = { ...DB.plots.cards[i], ...pd };
-  } else {
-    DB.plots.cards.push({ id: genId(), ...pd });
-  }
-  autoSave('plots');
-  closeModal('modal-plot');
-  renderPlotboard();
-  updateBadges();
-  showToast(editingId ? '情节已更新' : '情节已创建');
-}
-
-function addPlotColumn() {
-  const name = prompt('输入新列名称：');
-  if (!name?.trim()) return;
-  if (!DB.plots.columns) DB.plots.columns = [];
-  DB.plots.columns.push(name.trim());
-  autoSave('plots');
-  renderPlotboard();
-}
-
-// ===== 钩子伏笔 =====
-function renderHooks() {
-  const list = $('hook-list');
-  if (!DB.hooks.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">🪝</div><p>还没有钩子/伏笔</p></div>';
-    return;
-  }
-  const statusMap = {open:{label:'未解答',cls:'tag-yellow'},closed:{label:'已解答',cls:'tag-green'},intentional:{label:'故意留白',cls:'tag-purple'}};
-  const typeIcons = {开篇钩子:'🎣',悬念:'❓',伏笔:'🌱',反转铺垫:'⚡',章末钩子:'🔚'};
-  list.innerHTML = DB.hooks.map(h => {
-    const st = statusMap[h.status] || statusMap.open;
-    return `
-      <div class="hook-item" onclick="openHookModal('${h.id}')">
-        <div class="hook-item-header">
-          <span>${typeIcons[h.type]||'🪝'}</span>
-          <div class="hook-item-title">${h.title}</div>
-          <span class="tag ${st.cls}">${st.label}</span>
-          ${h.priority?`<span class="tag">${h.priority}</span>`:''}
-        </div>
-        ${h.desc?`<div class="hook-item-desc">${h.desc}</div>`:''}
-        <div class="hook-item-footer">
-          ${h.plant?`<span class="tag tag-accent">埋：${h.plant}</span>`:''}
-          ${h.harvest?`<span class="tag tag-green">收：${h.harvest}</span>`:''}
-          <span style="flex:1"></span>
-          <button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="event.stopPropagation();deleteHook('${h.id}')">🗑️</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function openHookModal(id) {
-  editingId = id || null;
-  $('hook-modal-title').textContent = id ? '编辑钩子' : '新建钩子/伏笔';
-  if (id) {
-    const h = DB.hooks.find(x => x.id === id);
-    if (!h) return;
-    $('hook-title').value = h.title||''; $('hook-type').value = h.type||'悬念';
-    $('hook-desc').value = h.desc||''; $('hook-plant').value = h.plant||'';
-    $('hook-harvest').value = h.harvest||''; $('hook-status').value = h.status||'open';
-    $('hook-priority').value = h.priority||'中';
-  } else {
-    ['hook-title','hook-desc','hook-plant','hook-harvest'].forEach(f => $(f).value = '');
-    $('hook-type').value = '悬念'; $('hook-status').value = 'open'; $('hook-priority').value = '中';
-  }
-  openModal('modal-hook');
-}
-
-function saveHook() {
-  const title = $('hook-title').value.trim();
-  if (!title) { showToast('请输入标题'); return; }
-  const hd = { title, type: $('hook-type').value, desc: $('hook-desc').value.trim(), plant: $('hook-plant').value.trim(), harvest: $('hook-harvest').value.trim(), status: $('hook-status').value, priority: $('hook-priority').value };
-  if (editingId) {
-    const i = DB.hooks.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.hooks[i] = { ...DB.hooks[i], ...hd };
-  } else {
-    DB.hooks.push({ id: genId(), ...hd });
-  }
-  autoSave('hooks');
-  closeModal('modal-hook');
-  renderHooks();
-  updateBadges();
-  showToast(editingId ? '钩子已更新' : '钩子已创建');
-}
-
-function deleteHook(id) {
-  if (!confirm('确定删除？')) return;
-  DB.hooks = DB.hooks.filter(h => h.id !== id);
-  autoSave('hooks');
-  renderHooks();
-  updateBadges();
-}
-
-// ===== 反转设计 =====
-function renderReversals() {
-  const list = $('reversal-list');
-  if (!DB.reversals.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">🔄</div><p>还没有反转设计</p></div>';
-    return;
-  }
-  list.innerHTML = DB.reversals.map(r => `
-    <div class="reversal-card" onclick="openReversalModal('${r.id}')">
-      <div class="reversal-type-badge">${r.type||'反转'}</div>
-      <div class="card-title">${r.title}</div>
-      ${r.content?`<div class="card-desc">${r.content}</div>`:''}
-      ${r.foreshadow?`<div style="margin-top:8px;font-size:11px;color:var(--text3)"><strong>铺垫：</strong>${r.foreshadow.split('\n').slice(0,2).join('；')}${r.foreshadow.split('\n').length>2?'...':''}</div>`:''}
-      <div class="card-footer">
-        ${r.chapter?`<span class="tag tag-accent">${r.chapter}</span>`:''}
-        ${r.chars?`<span class="tag">${r.chars}</span>`:''}
-        <span style="flex:1"></span>
-        <button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="event.stopPropagation();deleteReversal('${r.id}')">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openReversalModal(id) {
-  editingId = id || null;
-  $('reversal-modal-title').textContent = id ? '编辑反转' : '新建反转';
-  if (id) {
-    const r = DB.reversals.find(x => x.id === id);
-    if (!r) return;
-    $('rev-title').value = r.title||''; $('rev-type').value = r.type||'身份反转';
-    $('rev-content').value = r.content||''; $('rev-foreshadow').value = r.foreshadow||'';
-    $('rev-expectation').value = r.expectation||''; $('rev-chapter').value = r.chapter||'';
-    $('rev-chars').value = r.chars||'';
-  } else {
-    ['rev-title','rev-content','rev-foreshadow','rev-expectation','rev-chapter','rev-chars'].forEach(f => $(f).value = '');
-    $('rev-type').value = '身份反转';
-  }
-  openModal('modal-reversal');
-}
-
-function saveReversal() {
-  const title = $('rev-title').value.trim();
-  if (!title) { showToast('请输入标题'); return; }
-  const rd = { title, type: $('rev-type').value, content: $('rev-content').value.trim(), foreshadow: $('rev-foreshadow').value.trim(), expectation: $('rev-expectation').value.trim(), chapter: $('rev-chapter').value.trim(), chars: $('rev-chars').value.trim() };
-  if (editingId) {
-    const i = DB.reversals.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.reversals[i] = { ...DB.reversals[i], ...rd };
-  } else {
-    DB.reversals.push({ id: genId(), ...rd });
-  }
-  autoSave('reversals');
-  closeModal('modal-reversal');
-  renderReversals();
-  updateBadges();
-  showToast(editingId ? '反转已更新' : '反转已创建');
-}
-
-function deleteReversal(id) {
-  if (!confirm('确定删除？')) return;
-  DB.reversals = DB.reversals.filter(r => r.id !== id);
-  autoSave('reversals');
-  renderReversals();
-  updateBadges();
-}
-
-// ===== 时间线 =====
-function renderTimeline() {
-  const list = $('timeline-list');
-  if (!DB.timeline.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>还没有时间线事件</p></div>';
-    return;
-  }
-  list.innerHTML = DB.timeline.map(t => `
-    <div class="timeline-item ${t.level==='major'?'major':''}" onclick="openTimelineModal('${t.id}')">
-      <div class="timeline-date">${t.time||''}</div>
-      <div class="timeline-title">${t.title}</div>
-      ${t.desc?`<div class="timeline-desc">${t.desc}</div>`:''}
-      ${t.chars?`<div style="margin-top:6px"><span class="tag tag-accent" style="font-size:10px">${t.chars}</span></div>`:''}
-    </div>
-  `).join('');
-}
-
-function openTimelineModal(id) {
-  editingId = id || null;
-  $('timeline-modal-title').textContent = id ? '编辑事件' : '添加事件';
-  if (id) {
-    const t = DB.timeline.find(x => x.id === id);
-    if (!t) return;
-    $('tl-time').value = t.time||''; $('tl-level').value = t.level||'normal';
-    $('tl-title').value = t.title||''; $('tl-desc').value = t.desc||'';
-    $('tl-chars').value = t.chars||'';
-  } else {
-    ['tl-time','tl-title','tl-desc','tl-chars'].forEach(f => $(f).value = '');
-    $('tl-level').value = 'normal';
-  }
-  openModal('modal-timeline');
-}
-
-function saveTimeline() {
-  const title = $('tl-title').value.trim();
-  const time = $('tl-time').value.trim();
-  if (!title || !time) { showToast('请填写时间和标题'); return; }
-  const td = { time, title, level: $('tl-level').value, desc: $('tl-desc').value.trim(), chars: $('tl-chars').value.trim() };
-  if (editingId) {
-    const i = DB.timeline.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.timeline[i] = { ...DB.timeline[i], ...td };
-  } else {
-    DB.timeline.push({ id: genId(), ...td });
-  }
-  autoSave('timeline');
-  closeModal('modal-timeline');
-  renderTimeline();
-  updateBadges();
-  showToast(editingId ? '事件已更新' : '事件已添加');
-}
-
-// ===== 章节管理 =====
-function renderChapters() {
-  const list = $('chapter-list');
-  if (!DB.chapters.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">📑</div><p>还没有章节</p></div>';
-    return;
-  }
-  const statusLabels = {draft:'草稿',writing:'写作中',done:'已完成',revision:'修改中'};
-  const statusCls = {draft:'',writing:'tag-accent',done:'tag-green',revision:'tag-yellow'};
-  list.innerHTML = DB.chapters.map((c, i) => `
-    <div class="card" style="margin-bottom:10px" onclick="openChapterModal('${c.id}')">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="color:var(--accent2);font-weight:700;font-size:13px;min-width:50px">第${i+1}章</span>
-        <span style="font-weight:600;flex:1">${c.title}</span>
-        <span class="tag ${statusCls[c.status]||''}">${statusLabels[c.status]||'草稿'}</span>
-        ${c.wordCount?`<span style="font-size:11px;color:var(--text3)">${c.wordCount}字</span>`:''}
-        ${c.mood?`<span class="tag" style="font-size:10px">${c.mood}</span>`:''}
-      </div>
-      ${c.summary?`<div style="font-size:12px;color:var(--text3);margin-top:8px;padding-left:62px">${c.summary.substring(0,120)}${c.summary.length>120?'...':''}</div>`:''}
-      <div style="display:flex;gap:8px;margin-top:8px;padding-left:62px">
-        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();startEditing('${c.id}')">✍️ 写作</button>
-        <button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="event.stopPropagation();deleteChapter('${c.id}')">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openChapterModal(id) {
-  editingId = id || null;
-  $('chapter-modal-title').textContent = id ? '编辑章节' : '新建章节';
-  if (id) {
-    const c = DB.chapters.find(x => x.id === id);
-    if (!c) return;
-    $('ch-title').value = c.title||''; $('ch-status').value = c.status||'draft';
-    $('ch-summary').value = c.summary||''; $('ch-chars').value = c.chars||'';
-    $('ch-mood').value = c.mood||'紧张'; $('ch-outline').value = c.outline||'';
-  } else {
-    ['ch-title','ch-summary','ch-chars','ch-outline'].forEach(f => $(f).value = '');
-    $('ch-status').value = 'draft'; $('ch-mood').value = '紧张';
-  }
-  openModal('modal-chapter');
-}
-
-function saveChapter() {
-  const title = $('ch-title').value.trim();
-  if (!title) { showToast('请输入章节标题'); return; }
-  const cd = { title, status: $('ch-status').value, summary: $('ch-summary').value.trim(), chars: $('ch-chars').value.trim(), mood: $('ch-mood').value, outline: $('ch-outline').value.trim() };
-  if (editingId) {
-    const i = DB.chapters.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.chapters[i] = { ...DB.chapters[i], ...cd };
-  } else {
-    DB.chapters.push({ id: genId(), ...cd, content: '', wordCount: 0 });
-  }
-  autoSave('chapters');
-  closeModal('modal-chapter');
-  renderChapters();
-  updateBadges();
-  showToast(editingId ? '章节已更新' : '章节已创建');
-}
-
-function deleteChapter(id) {
-  if (!confirm('确定删除该章节？正文内容也会丢失！')) return;
-  DB.chapters = DB.chapters.filter(c => c.id !== id);
-  autoSave('chapters');
-  renderChapters();
-  updateBadges();
-}
-
-// ===== 正文编辑器 =====
-function renderEditor() {
-  const sidebar = $('editor-sidebar');
-  sidebar.innerHTML = `
-    <div class="editor-sidebar-section">
-      <div class="editor-sidebar-title">章节列表</div>
-      ${DB.chapters.map((c, i) => `
-        <div class="editor-sidebar-item ${c.id===currentChapterId?'active':''}" onclick="startEditing('${c.id}')">
-          第${i+1}章 ${c.title}
-        </div>
-      `).join('')}
-      ${!DB.chapters.length?'<div style="font-size:12px;color:var(--text3);padding:8px">暂无章节</div>':''}
-    </div>
-    <div class="editor-sidebar-section">
-      <div class="editor-sidebar-title">快速参考</div>
-      ${DB.characters.slice(0,8).map(c => `<div class="editor-sidebar-item" style="font-size:11px">👤 ${c.name} - ${c.role||''}</div>`).join('')}
-    </div>
-  `;
-}
-
-function startEditing(chapterId) {
-  currentChapterId = chapterId;
-  const ch = DB.chapters.find(c => c.id === chapterId);
-  if (!ch) return;
-  $('editor-textarea').value = ch.content || '';
-  $('editor-chapter-title').textContent = `第${DB.chapters.indexOf(ch)+1}章 ${ch.title}`;
-  $('editor-wordcount').textContent = (ch.content||'').replace(/\s/g,'').length + ' 字';
-  switchPanel('editor');
-}
-
-function onEditorInput() {
-  if (!currentChapterId) return;
-  const ch = DB.chapters.find(c => c.id === currentChapterId);
-  if (!ch) return;
-  ch.content = $('editor-textarea').value;
-  ch.wordCount = ch.content.replace(/\s/g,'').length;
-  $('editor-wordcount').textContent = ch.wordCount + ' 字';
-  autoSave('chapters');
-}
-
-function toggleFocus() {
-  focusMode = !focusMode;
-  const sidebar = document.querySelector('.editor-sidebar');
-  const toolbar = document.querySelector('.editor-toolbar');
-  const sidebarMain = document.querySelector('.sidebar');
-  if (focusMode) {
-    sidebar.style.display = 'none';
-    sidebarMain.style.display = 'none';
-    showToast('🎯 专注模式 · 按 Esc 退出');
-  } else {
-    sidebar.style.display = '';
-    sidebarMain.style.display = '';
-  }
-}
-
-// ===== 素材库 =====
-function renderMaterials() {
-  const list = $('material-list');
-  if (!DB.materials.length) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">🗂️</div><p>还没有素材</p></div>';
-    return;
-  }
-  const typeIcons = {灵感:'💡',金句:'✨',意象:'🎨',参考:'📚',笔记:'📝',对话:'💬'};
-  list.innerHTML = DB.materials.map(m => `
-    <div class="material-item" onclick="openMaterialModal('${m.id}')">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <span>${typeIcons[m.type]||'📄'}</span>
-        <span class="material-type">${m.type}</span>
-        ${m.tags?`<span style="font-size:11px;color:var(--text3)">${m.tags}</span>`:''}
-        <span style="flex:1"></span>
-        <button class="btn btn-sm btn-ghost" style="color:var(--red);padding:2px 6px" onclick="event.stopPropagation();deleteMaterial('${m.id}')">✕</button>
-      </div>
-      <div class="material-content">${m.content.substring(0,200)}${m.content.length>200?'...':''}</div>
-      ${m.source?`<div style="font-size:11px;color:var(--text3);margin-top:4px">— ${m.source}</div>`:''}
-    </div>
-  `).join('');
-}
-
-function openMaterialModal(id) {
-  editingId = id || null;
-  $('material-modal-title').textContent = id ? '编辑素材' : '添加素材';
-  if (id) {
-    const m = DB.materials.find(x => x.id === id);
-    if (!m) return;
-    $('mat-type').value = m.type||'灵感'; $('mat-tags').value = m.tags||'';
-    $('mat-content').value = m.content||''; $('mat-source').value = m.source||'';
-  } else {
-    ['mat-tags','mat-content','mat-source'].forEach(f => $(f).value = '');
-    $('mat-type').value = '灵感';
-  }
-  openModal('modal-material');
-}
-
-function saveMaterial() {
-  const content = $('mat-content').value.trim();
-  if (!content) { showToast('请输入内容'); return; }
-  const md = { type: $('mat-type').value, tags: $('mat-tags').value.trim(), content, source: $('mat-source').value.trim() };
-  if (editingId) {
-    const i = DB.materials.findIndex(x => x.id === editingId);
-    if (i !== -1) DB.materials[i] = { ...DB.materials[i], ...md };
-  } else {
-    DB.materials.push({ id: genId(), ...md, createdAt: new Date().toISOString() });
-  }
-  autoSave('materials');
-  closeModal('modal-material');
-  renderMaterials();
-  updateBadges();
-  showToast(editingId ? '素材已更新' : '素材已添加');
-}
-
-function deleteMaterial(id) {
-  if (!confirm('确定删除？')) return;
-  DB.materials = DB.materials.filter(m => m.id !== id);
-  autoSave('materials');
-  renderMaterials();
-  updateBadges();
-}
-
-// ===== 数据分析 =====
-function renderAnalytics() {
-  const content = $('analytics-content');
-  // 章节字数分布
-  const chapterWords = DB.chapters.map((c, i) => ({ label: `${i+1}`, value: c.wordCount || 0 }));
-  const maxWords = Math.max(...chapterWords.map(c => c.value), 1);
-  
-  // 人物出场频率（简单统计）
-  const charFreq = DB.characters.map(c => {
-    const count = DB.chapters.filter(ch => (ch.chars||'').includes(c.name) || (ch.content||'').includes(c.name)).length;
-    return { name: c.name, count };
-  }).sort((a,b) => b.count - a.count).slice(0, 10);
-  const maxFreq = Math.max(...charFreq.map(c => c.count), 1);
-
-  content.innerHTML = `
-    <div class="chart-container">
-      <div class="chart-title">📊 各章字数分布</div>
-      ${chapterWords.length ? `
-        <div class="bar-chart">
-          ${chapterWords.map(c => `<div class="bar" style="height:${Math.max(4, c.value/maxWords*100)}%" title="第${c.label}章: ${c.value}字"><div class="bar-label">${c.label}</div></div>`).join('')}
-        </div>
-      ` : '<div style="color:var(--text3);font-size:12px">暂无数据</div>'}
-    </div>
-    <div class="chart-container">
-      <div class="chart-title">👥 人物出场频率（按章节）</div>
-      ${charFreq.length ? `
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${charFreq.map(c => `
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="min-width:60px;font-size:12px;text-align:right">${c.name}</span>
-              <div style="flex:1;height:20px;background:var(--bg3);border-radius:4px;overflow:hidden">
-                <div style="height:100%;width:${c.count/maxFreq*100}%;background:var(--accent);border-radius:4px;transition:width .3s"></div>
-              </div>
-              <span style="font-size:11px;color:var(--text3);min-width:30px">${c.count}章</span>
-            </div>
-          `).join('')}
-        </div>
-      ` : '<div style="color:var(--text3);font-size:12px">暂无数据</div>'}
-    </div>
-    <div class="chart-container">
-      <div class="chart-title">🪝 钩子状态分布</div>
-      <div style="display:flex;gap:16px;font-size:13px">
-        <span style="color:var(--yellow)">● 未解答: ${DB.hooks.filter(h=>h.status==='open').length}</span>
-        <span style="color:var(--green)">● 已解答: ${DB.hooks.filter(h=>h.status==='closed').length}</span>
-        <span style="color:var(--purple)">● 留白: ${DB.hooks.filter(h=>h.status==='intentional').length}</span>
-      </div>
-    </div>
-    <div class="chart-container">
-      <div class="chart-title">📈 创作概况</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
-        <div>总字数：<strong>${DB.chapters.reduce((s,c)=>s+(c.wordCount||0),0).toLocaleString()}</strong></div>
-        <div>总章节：<strong>${DB.chapters.length}</strong></div>
-        <div>人物数：<strong>${DB.characters.length}</strong></div>
-        <div>关系数：<strong>${DB.relations.length}</strong></div>
-        <div>情节卡：<strong>${DB.plots.cards?.length||0}</strong></div>
-        <div>反转数：<strong>${DB.reversals.length}</strong></div>
-      </div>
-    </div>
-  `;
-}
-
-// ===== 更新徽章 =====
-function updateBadges() {
-  $('badge-chars').textContent = DB.characters.length;
-  $('badge-locs').textContent = DB.locations.length;
-  $('badge-plots').textContent = DB.plots.cards?.length || 0;
-  $('badge-hooks').textContent = DB.hooks.filter(h=>h.status==='open').length;
-  $('badge-reversals').textContent = DB.reversals.length;
-  $('badge-timeline').textContent = DB.timeline.length;
-  $('badge-chapters').textContent = DB.chapters.length;
-  $('badge-materials').textContent = DB.materials.length;
-}
-
-// ===== 键盘快捷键 =====
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && focusMode) {
-    toggleFocus();
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-    e.preventDefault();
-    saveAll();
-  }
-});
-
-// ===== 初始化 =====
-(async function init() {
-  const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-  
-  // 优先从 data/*.json 文件加载（需要本地服务器）
-  let loadedFromFile = false;
-  try {
-    const results = await Promise.all(keys.map(key =>
-      fetch(`/novel-workspace/data/${key}.json`)
-        .then(r => r.ok ? r.json() : null)
-        .catch(() => null)
-    ));
-    let anyLoaded = false;
-    results.forEach((data, i) => {
-      if (data !== null) { DB[keys[i]] = data; anyLoaded = true; }
-    });
-    if (anyLoaded) loadedFromFile = true;
-  } catch(e) {}
-
-  // 回退：从 localStorage 加载
-  if (!loadedFromFile) {
-    keys.forEach(key => {
-      try {
-        const s = localStorage.getItem('novel_' + key);
-        if (s) DB[key] = JSON.parse(s);
-      } catch(e) {}
-    });
-  }
-
-  updateProjectName();
-  updateBadges();
-  renderDashboard();
-  showToast(loadedFromFile ? '✅ 已从 data/ 文件加载数据' : '✅ 数据已加载（localStorage）');
-})();
-
-// ===== 写回 JSON 文件 =====
-async function saveToFile(key) {
-  try {
-    await fetch(`/novel-workspace/data/${key}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(DB[key], null, 2)
-    });
-  } catch(e) {
-    // 服务器不支持写入时静默失败，localStorage已兜底
-  }
-}
-</script>
+<script src="novel-studio.js"></script>
 </body>
 </html>
