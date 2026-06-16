@@ -196,6 +196,24 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:
 .reversal-card:hover{border-color:var(--purple);}
 .reversal-type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(139,92,207,.15);color:var(--purple);margin-bottom:8px;}
 
+/* === 人物卡片（写作台风格） === */
+.char-card-new{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative;border-left:3px solid var(--accent);}
+.char-card-new:hover{border-color:var(--accent);background:var(--bg3);}
+.char-card-new .char-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.char-card-new .char-role-title{font-size:11px;color:var(--accent2);margin-bottom:6px;}
+.char-card-new .char-tags-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.char-card-new .char-tag{font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg4);color:var(--text2);}
+.char-card-new .char-summary{font-size:12px;color:var(--text2);line-height:1.6;}
+.char-card-new .char-details-block{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);}
+.char-card-new.expanded .char-details-block{display:block;}
+.char-detail-row{margin-bottom:5px;line-height:1.6;}
+.char-detail-key{color:var(--accent2);font-weight:600;margin-right:4px;}
+.char-card-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .15s;}
+.char-card-new:hover .char-card-actions{opacity:1;}
+.char-expand-hint{font-size:10px;color:var(--text3);margin-top:6px;}
+.char-panel-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;}
+.char-panel-toolbar .char-count{margin-left:auto;font-size:12px;color:var(--text3);}
+
 /* === 搜索框 === */
 .search-box{position:relative;}
 .search-box input{padding-left:32px;}
@@ -209,11 +227,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:
   <div class="topbar-logo">📖 小说工作台</div>
   <div class="topbar-project" id="project-name" onclick="openProjectModal()">未命名作品</div>
   <div class="topbar-status">
-    <span id="file-status">未连接文件</span>
-    <span class="dot" id="status-dot" style="display:none"></span>
-    <button class="topbar-btn primary" id="btn-open" onclick="openWorkspace()">📂 打开工作区</button>
-    <button class="topbar-btn" id="btn-sync" onclick="reloadAll()" style="display:none">🔄 同步</button>
-    <button class="topbar-btn" id="btn-save" onclick="saveAll()" style="display:none">💾 保存</button>
+    <span class="dot" style="background:var(--green)"></span>
+    <span style="font-size:12px;color:var(--green)">本地存储</span>
+    <button class="topbar-btn" onclick="exportBackup()">📤 导出备份</button>
+    <button class="topbar-btn" onclick="importBackup()">📥 导入备份</button>
   </div>
 </div>
 
@@ -286,7 +303,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:
         <input class="form-input" id="char-search" placeholder="搜索人物..." oninput="renderCharacters()" style="flex:1;max-width:240px;margin-left:16px">
         <div class="panel-actions"><button class="btn btn-primary btn-sm" onclick="openCharModal()">+ 新建人物</button></div>
       </div>
-      <div class="panel-body"><div class="card-grid" id="char-grid"></div></div>
+      <div class="panel-body" style="padding:16px 20px;"><div id="char-grid"></div></div>
     </div>
 
     <!-- 关系图谱 -->
@@ -429,31 +446,13 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:
   <div class="modal modal-lg">
     <div class="modal-header"><div class="modal-title" id="char-modal-title">新建人物</div><button class="modal-close" onclick="closeModal('modal-char')">✕</button></div>
     <div class="modal-body">
-      <div class="form-row-3">
-        <div class="form-group"><label class="form-label">姓名 *</label><input class="form-input" id="char-name"></div>
-        <div class="form-group"><label class="form-label">别名</label><input class="form-input" id="char-alias"></div>
-        <div class="form-group"><label class="form-label">年龄</label><input class="form-input" id="char-age"></div>
-      </div>
-      <div class="form-row-3">
-        <div class="form-group"><label class="form-label">性别</label>
-          <select class="form-select" id="char-gender"><option value="">未设定</option><option>男</option><option>女</option><option>其他</option></select>
-        </div>
-        <div class="form-group"><label class="form-label">角色定位</label>
-          <select class="form-select" id="char-role"><option>主角</option><option>配角</option><option>反派</option><option>路人</option><option>导师</option></select>
-        </div>
-        <div class="form-group"><label class="form-label">颜色标记</label>
-          <select class="form-select" id="char-color"><option value="#6366f1">紫</option><option value="#3b82f6">蓝</option><option value="#10b981">绿</option><option value="#f59e0b">黄</option><option value="#ef4444">红</option><option value="#ec4899">粉</option><option value="#06b6d4">青</option><option value="#f97316">橙</option></select>
-        </div>
-      </div>
-      <div class="form-group"><label class="form-label">外貌特征</label><textarea class="form-textarea" id="char-appearance" rows="2"></textarea></div>
-      <div class="form-group"><label class="form-label">性格特点</label><textarea class="form-textarea" id="char-personality" rows="2"></textarea></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">表层目标</label><input class="form-input" id="char-goal"></div>
-        <div class="form-group"><label class="form-label">深层欲望</label><input class="form-input" id="char-desire"></div>
+        <div class="form-group"><label class="form-label">姓名 *</label><input class="form-input" id="char-name" placeholder="角色名"></div>
+        <div class="form-group"><label class="form-label">身份定位</label><input class="form-input" id="char-title" placeholder="如：主角 / 穿越者"></div>
       </div>
-      <div class="form-group"><label class="form-label">秘密</label><input class="form-input" id="char-secret"></div>
-      <div class="form-group"><label class="form-label">成长弧线</label><textarea class="form-textarea" id="char-arc" rows="2"></textarea></div>
-      <div class="form-group"><label class="form-label">备注</label><textarea class="form-textarea" id="char-notes" rows="2"></textarea></div>
+      <div class="form-group"><label class="form-label">标签 <span style="color:var(--text3);font-weight:400">（逗号分隔，如：28岁，前会计，理性有底线）</span></label><input class="form-input" id="char-tags" placeholder="28岁，前会计，理性有底线"></div>
+      <div class="form-group"><label class="form-label">简介</label><textarea class="form-textarea" id="char-summary" rows="3" placeholder="一两句话概括这个角色"></textarea></div>
+      <div class="form-group"><label class="form-label">详细信息 <span style="color:var(--text3);font-weight:400">（每行一条，"键：值"格式，如：性格：理性有底线）</span></label><textarea class="form-textarea" id="char-details" rows="6" placeholder="性格：理性有底线，吃软不吃硬&#10;能力：通幽、驱神、斩妖&#10;装备：青布道袍、刻字剑&#10;名言：我一个会计，你让我学这？"></textarea></div>
     </div>
     <div class="modal-footer"><button class="btn" onclick="closeModal('modal-char')">取消</button><button class="btn btn-primary" onclick="saveChar()">保存</button></div>
   </div>
@@ -641,8 +640,6 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:
 
 <script>
 // ===== 全局状态 =====
-let dirHandle = null; // 工作区文件夹句柄
-let dataHandles = {}; // 各数据文件句柄缓存
 let DB = {
   project: {name:'未命名作品',author:'',genre:'',desc:'',targetWords:0,startDate:'',status:'构思中'},
   characters: [],
@@ -703,150 +700,61 @@ function switchPanel(name) {
   renderers[name]?.();
 }
 
-// ===== File System Access API =====
-async function openWorkspace() {
-  try {
-    if (!window.showDirectoryPicker) {
-      showToast('⚠️ 请使用 Chrome 或 Edge 浏览器');
-      return;
-    }
-    // file://协议下可能会失败，给出提示
-    if (location.protocol === 'file:') {
-      const ok = confirm('当前是直接打开HTML文件，文件系统API可能受限。\n\n推荐方式：双击「启动工作台.bat」启动后再使用。\n\n是否仍然尝试？');
-      if (!ok) return;
-    }
-    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    // 确保 data 子目录存在
-    const dataDir = await dirHandle.getDirectoryHandle('data', { create: true });
-    await dirHandle.getDirectoryHandle('chapters', { create: true });
-    await dirHandle.getDirectoryHandle('exports', { create: true });
-    // 加载所有数据
-    await loadAllData(dataDir);
-    // 更新UI
-    $('file-status').textContent = '✅ 已连接';
-    $('status-dot').style.display = '';
-    $('btn-sync').style.display = '';
-    $('btn-save').style.display = '';
-    $('btn-open').textContent = '📂 切换工作区';
-    updateProjectName();
-    renderDashboard();
-    updateBadges();
-    showToast('✅ 工作区已打开，编辑自动保存');
-  } catch(e) {
-    if (e.name === 'AbortError') return;
-    if (e.name === 'SecurityError' || e.message.includes('secure context')) {
-      showToast('❌ 安全限制：请双击「启动工作台.bat」通过服务器访问');
-    } else {
-      showToast('❌ 打开失败：' + e.message);
-    }
-    console.error('openWorkspace error:', e);
-  }
-}
-
-async function loadAllData(dataDir) {
-  const files = {
-    'project.json': 'project',
-    'characters.json': 'characters',
-    'relations.json': 'relations',
-    'locations.json': 'locations',
-    'plots.json': 'plots',
-    'hooks.json': 'hooks',
-    'reversals.json': 'reversals',
-    'timeline.json': 'timeline',
-    'chapters.json': 'chapters',
-    'materials.json': 'materials',
-    'settings.json': 'settings'
-  };
-  for (const [filename, key] of Object.entries(files)) {
-    try {
-      const fh = await dataDir.getFileHandle(filename, { create: true });
-      dataHandles[key] = fh;
-      const file = await fh.getFile();
-      const text = await file.text();
-      if (text.trim()) {
-        DB[key] = JSON.parse(text);
-      }
-    } catch(e) {
-      console.warn(`加载 ${filename} 失败:`, e);
-    }
-  }
-}
-
-async function saveFile(key) {
-  if (!dataHandles[key]) return;
-  try {
-    const writable = await dataHandles[key].createWritable();
-    await writable.write(JSON.stringify(DB[key], null, 2));
-    await writable.close();
-  } catch(e) {
-    console.warn(`保存 ${key} 失败:`, e);
-  }
-}
-
+// ===== localStorage 存储 =====
 function autoSave(key) {
-  // 优先用文件系统API
-  if (dirHandle) {
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => saveFile(key), 500);
-    return;
-  }
-  // 服务器模式：通过API保存
-  if (location.protocol !== 'file:') {
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => saveViaAPI(key), 500);
-    return;
-  }
-  // 最后兜底：localStorage
-  try { localStorage.setItem('novel_' + key, JSON.stringify(DB[key])); } catch(e) {}
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    try { localStorage.setItem('novel_' + key, JSON.stringify(DB[key])); } catch(e) {}
+  }, 300);
 }
 
-async function saveViaAPI(key) {
-  try {
-    const resp = await fetch(`/api/save/${key}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(DB[key])
-    });
-    if (!resp.ok) throw new Error('保存失败');
-  } catch(e) {
-    console.error('API保存失败:', e);
-    // 兜底到localStorage
-    try { localStorage.setItem('novel_' + key, JSON.stringify(DB[key])); } catch(e2) {}
-  }
+function saveAll() {
+  const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
+  keys.forEach(key => {
+    try { localStorage.setItem('novel_' + key, JSON.stringify(DB[key])); } catch(e) {}
+  });
+  showToast('💾 已保存到本地');
 }
 
-async function saveAll() {
-  if (dirHandle) {
-    for (const key of Object.keys(dataHandles)) {
-      await saveFile(key);
-    }
-    showToast('💾 全部已保存');
-  } else if (location.protocol !== 'file:') {
-    // 服务器模式批量保存
-    const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-    for (const key of keys) {
-      await saveViaAPI(key);
-    }
-    showToast('💾 全部已保存到服务器');
-  } else {
-    showToast('⚠️ 当前模式仅保存在浏览器中');
-  }
+function exportBackup() {
+  const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
+  const data = {};
+  keys.forEach(k => data[k] = DB[k]);
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${DB.project.name||'小说'}_备份_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📤 备份已导出');
 }
 
-async function reloadAll() {
-  if (dirHandle) {
-    const dataDir = await dirHandle.getDirectoryHandle('data');
-    await loadAllData(dataDir);
-  } else if (location.protocol !== 'file:') {
-    // 服务器模式重新加载
-    await tryAutoLoad();
-  } else {
-    showToast('请先打开工作区'); return;
-  }
-  updateProjectName();
-  updateBadges();
-  switchPanel(currentPanel);
-  showToast('🔄 已重新加载');
+function importBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
+        keys.forEach(k => { if (data[k] !== undefined) DB[k] = data[k]; });
+        saveAll();
+        updateProjectName();
+        updateBadges();
+        switchPanel('dashboard');
+        showToast('📥 备份已导入 ✓');
+      } catch(e) {
+        showToast('❌ 导入失败，文件格式有误');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 // ===== 项目信息 =====
@@ -938,58 +846,137 @@ function renderDashboard() {
 // ===== 人物管理 =====
 function renderCharacters() {
   const search = ($('char-search')?.value || '').toLowerCase();
-  const chars = DB.characters.filter(c => c.name.toLowerCase().includes(search) || (c.alias||'').toLowerCase().includes(search));
+  const chars = DB.characters.filter(c =>
+    c.name.toLowerCase().includes(search) ||
+    (c.title||'').toLowerCase().includes(search) ||
+    (c.summary||'').toLowerCase().includes(search)
+  );
   const grid = $('char-grid');
   if (!chars.length) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">👤</div><p>还没有人物，点击右上角新建</p></div>`;
     return;
   }
-  grid.innerHTML = chars.map(c => `
-    <div class="card" onclick="openCharModal('${c.id}')">
-      <div class="card-title"><span style="width:10px;height:10px;border-radius:50%;background:${c.color||'var(--accent)'};flex-shrink:0"></span>${c.name}${c.alias?` <span style="font-size:11px;color:var(--text3);font-weight:400">· ${c.alias}</span>`:''}</div>
-      <div class="card-tags">
-        <span class="tag">${c.role||'未设定'}</span>
-        ${c.age?`<span class="tag">${c.age}岁</span>`:''}
-        ${c.gender?`<span class="tag">${c.gender}</span>`:''}
+  // 列表模式（写作台风格）
+  grid.style.display = 'block';
+  grid.innerHTML = chars.map(c => {
+    const color = c.color || '#6366f1';
+    const tags = Array.isArray(c.tags) ? c.tags : (c.tags||'').split(/[，,]/).filter(Boolean);
+    // 兼容旧字段：把旧字段合并成details
+    let details = c.details || {};
+    if (typeof details === 'string') {
+      // 解析键值对文本
+      details = {};
+      c.details.split('\n').forEach(line => {
+        const idx = line.indexOf('：');
+        if (idx > 0) details[line.slice(0,idx).trim()] = line.slice(idx+1).trim();
+      });
+    }
+    // 兼容旧字段
+    if (!Object.keys(details).length) {
+      if (c.appearance) details['外貌'] = c.appearance;
+      if (c.personality) details['性格'] = c.personality;
+      if (c.goal) details['目标'] = c.goal;
+      if (c.desire) details['欲望'] = c.desire;
+      if (c.secret) details['秘密'] = c.secret;
+      if (c.arc) details['成长弧线'] = c.arc;
+      if (c.notes) details['备注'] = c.notes;
+    }
+    const detailsHtml = Object.entries(details).map(([k,v]) => {
+      const val = Array.isArray(v) ? v.join('；') : v;
+      return `<div class="char-detail-row"><span class="char-detail-key">${k}：</span>${val}</div>`;
+    }).join('');
+    const hasDetails = Object.keys(details).length > 0;
+    return `
+    <div class="char-card-new" onclick="toggleCharCard(this)" data-id="${c.id}">
+      <div class="char-card-actions">
+        <button class="btn btn-sm" onclick="event.stopPropagation();openCharModal('${c.id}')">✎</button>
+        <button class="btn btn-sm" style="color:var(--red)" onclick="event.stopPropagation();deleteChar('${c.id}')">✕</button>
       </div>
-      ${c.personality?`<div class="card-desc" style="margin-top:8px">${c.personality.substring(0,80)}${c.personality.length>80?'...':''}</div>`:''}
-      <div class="card-footer">
-        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openCharModal('${c.id}')">✏️ 编辑</button>
-        <button class="btn btn-sm btn-ghost" style="color:var(--red)" onclick="event.stopPropagation();deleteChar('${c.id}')">🗑️</button>
-      </div>
-    </div>
-  `).join('');
+      <div class="char-name">${c.name}</div>
+      <div class="char-role-title">${c.title||c.role||''}</div>
+      ${tags.length ? `<div class="char-tags-row">${tags.map(t=>`<span class="char-tag">${t}</span>`).join('')}</div>` : ''}
+      ${c.summary ? `<div class="char-summary">${c.summary}</div>` : ''}
+      ${hasDetails ? `<div class="char-details-block">${detailsHtml}</div><div class="char-expand-hint">▼ 点击展开详情</div>` : ''}
+    </div>`;
+  }).join('');
+  // 根据颜色设置左边框
+  grid.querySelectorAll('.char-card-new').forEach(card => {
+    const id = card.dataset.id;
+    const c = DB.characters.find(x => x.id === id);
+    if (c && c.color) card.style.borderLeftColor = c.color;
+  });
+}
+
+function toggleCharCard(card) {
+  card.classList.toggle('expanded');
+  const hint = card.querySelector('.char-expand-hint');
+  if (hint) hint.textContent = card.classList.contains('expanded') ? '▲ 收起' : '▼ 点击展开详情';
 }
 
 function openCharModal(id) {
   editingId = id || null;
   $('char-modal-title').textContent = id ? '编辑人物' : '新建人物';
-  const fields = ['name','alias','age','appearance','personality','goal','desire','secret','arc','notes'];
   if (id) {
     const c = DB.characters.find(x => x.id === id);
     if (!c) return;
-    fields.forEach(f => $(('char-'+f)).value = c[f] || '');
-    $('char-gender').value = c.gender || '';
-    $('char-role').value = c.role || '主角';
-    $('char-color').value = c.color || '#6366f1';
+    $('char-name').value = c.name || '';
+    $('char-title').value = c.title || c.role || '';
+    // 标签
+    const tags = Array.isArray(c.tags) ? c.tags : (c.tags||'').split(/[，,]/).filter(Boolean);
+    $('char-tags').value = tags.join('，');
+    $('char-summary').value = c.summary || '';
+    // 详情：兼容旧字段
+    let details = c.details || {};
+    if (!Object.keys(details).length) {
+      if (c.appearance) details['外貌'] = c.appearance;
+      if (c.personality) details['性格'] = c.personality;
+      if (c.goal) details['目标'] = c.goal;
+      if (c.desire) details['欲望'] = c.desire;
+      if (c.secret) details['秘密'] = c.secret;
+      if (c.arc) details['成长弧线'] = c.arc;
+      if (c.notes) details['备注'] = c.notes;
+    }
+    const detailsText = Object.entries(details).map(([k,v]) => {
+      const val = Array.isArray(v) ? v.join('；') : v;
+      return `${k}：${val}`;
+    }).join('\n');
+    $('char-details').value = detailsText;
   } else {
-    fields.forEach(f => $('char-'+f).value = '');
-    $('char-gender').value = '';
-    $('char-role').value = '主角';
-    $('char-color').value = '#6366f1';
+    $('char-name').value = '';
+    $('char-title').value = '';
+    $('char-tags').value = '';
+    $('char-summary').value = '';
+    $('char-details').value = '';
   }
   openModal('modal-char');
+  setTimeout(() => $('char-name').focus(), 100);
 }
 
 function saveChar() {
   const name = $('char-name').value.trim();
   if (!name) { showToast('请输入人物姓名'); return; }
+  // 解析详情文本
+  const detailsText = $('char-details').value.trim();
+  const details = {};
+  if (detailsText) {
+    detailsText.split('\n').forEach(line => {
+      const idx = line.indexOf('：');
+      if (idx > 0) {
+        details[line.slice(0,idx).trim()] = line.slice(idx+1).trim();
+      } else {
+        const idx2 = line.indexOf(':');
+        if (idx2 > 0) details[line.slice(0,idx2).trim()] = line.slice(idx2+1).trim();
+      }
+    });
+  }
+  const tags = $('char-tags').value.split(/[，,]/).map(t=>t.trim()).filter(Boolean);
   const cd = {
-    name, alias: $('char-alias').value.trim(), age: $('char-age').value.trim(),
-    gender: $('char-gender').value, role: $('char-role').value, color: $('char-color').value,
-    appearance: $('char-appearance').value.trim(), personality: $('char-personality').value.trim(),
-    goal: $('char-goal').value.trim(), desire: $('char-desire').value.trim(),
-    secret: $('char-secret').value.trim(), arc: $('char-arc').value.trim(), notes: $('char-notes').value.trim()
+    name,
+    title: $('char-title').value.trim(),
+    tags,
+    summary: $('char-summary').value.trim(),
+    details,
+    color: (editingId ? (DB.characters.find(x=>x.id===editingId)||{}).color : null) || '#6366f1',
   };
   if (editingId) {
     const i = DB.characters.findIndex(x => x.id === editingId);
@@ -1001,7 +988,7 @@ function saveChar() {
   closeModal('modal-char');
   renderCharacters();
   updateBadges();
-  showToast(editingId ? '人物已更新' : '人物已创建');
+  showToast(editingId ? '人物已更新 ✓' : '人物已创建 ✓');
 }
 
 function deleteChar(id) {
@@ -1730,61 +1717,50 @@ document.addEventListener('keydown', e => {
 });
 
 // ===== 初始化 =====
-(function init() {
-  // 尝试从 localStorage 恢复（无文件系统时的备选）
+(async function init() {
   const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-  keys.forEach(key => {
-    try {
-      const s = localStorage.getItem('novel_' + key);
-      if (s) DB[key] = JSON.parse(s);
-    } catch(e) {}
-  });
+  
+  // 优先从 data/*.json 文件加载（需要本地服务器）
+  let loadedFromFile = false;
+  try {
+    const results = await Promise.all(keys.map(key =>
+      fetch(`/novel-workspace/data/${key}.json`)
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+    ));
+    let anyLoaded = false;
+    results.forEach((data, i) => {
+      if (data !== null) { DB[keys[i]] = data; anyLoaded = true; }
+    });
+    if (anyLoaded) loadedFromFile = true;
+  } catch(e) {}
+
+  // 回退：从 localStorage 加载
+  if (!loadedFromFile) {
+    keys.forEach(key => {
+      try {
+        const s = localStorage.getItem('novel_' + key);
+        if (s) DB[key] = JSON.parse(s);
+      } catch(e) {}
+    });
+  }
+
   updateProjectName();
   updateBadges();
   renderDashboard();
-  
-  const isFileProtocol = location.protocol === 'file:';
-  const hasAPI = !!window.showDirectoryPicker;
-  
-  if (isFileProtocol && hasAPI) {
-    // file://协议下API可能受限，提示用启动脚本
-    $('file-status').textContent = '⚠️ 建议用启动脚本';
-    showToast('💡 双击「启动工作台.bat」可获得完整的自动保存功能。当前模式下也可正常使用，数据保存在浏览器中。');
-  } else if (!hasAPI) {
-    $('file-status').textContent = '⚠️ 请用Chrome/Edge';
-    showToast('⚠️ 请使用 Chrome 或 Edge 浏览器以获得完整功能');
-  } else {
-    // http://协议，完美模式
-    showToast('💡 点击右上角「📂 打开工作区」选择 novel-workspace 文件夹');
-    // 如果是通过服务器访问，尝试自动加载
-    tryAutoLoad();
-  }
+  showToast(loadedFromFile ? '✅ 已从 data/ 文件加载数据' : '✅ 数据已加载（localStorage）');
 })();
 
-// 通过服务器访问时，尝试自动从API加载数据
-async function tryAutoLoad() {
-  if (location.protocol === 'file:') return;
+// ===== 写回 JSON 文件 =====
+async function saveToFile(key) {
   try {
-    const resp = await fetch('/api/data');
-    if (resp.ok) {
-      const allData = await resp.json();
-      const keys = ['project','characters','relations','locations','plots','hooks','reversals','timeline','chapters','materials','settings'];
-      for (const key of keys) {
-        if (allData[key] !== undefined) {
-          DB[key] = allData[key];
-        }
-      }
-      updateProjectName();
-      updateBadges();
-      renderDashboard();
-      $('file-status').textContent = '✅ 已连接服务器';
-      $('status-dot').style.display = '';
-      $('btn-sync').style.display = '';
-      $('btn-save').style.display = '';
-      showToast('✅ 数据已加载，编辑自动保存到本地文件');
-    }
+    await fetch(`/novel-workspace/data/${key}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(DB[key], null, 2)
+    });
   } catch(e) {
-    console.error('自动加载失败:', e);
+    // 服务器不支持写入时静默失败，localStorage已兜底
   }
 }
 </script>
