@@ -53,6 +53,7 @@
           <button class="btn btn-sm" id="btnNext">下一章 ▶</button>
         </div>
       </div>
+      <div id="aiContextBar" style="display:none;padding:6px 12px;font-size:11px;background:#fef3c7;color:#78350f;border-bottom:1px solid #fcd34d;line-height:1.5"></div>
       <textarea id="editor" placeholder="此处落笔。" spellcheck="false"></textarea>
     </div>
 
@@ -87,6 +88,7 @@
               <button class="btn btn-sm btn-primary" id="btnAiSend">发</button>
               <button class="btn btn-sm" id="btnAiStop">停</button>
               <button class="btn btn-sm" id="btnAiInsert">插入</button>
+              <button class="btn btn-sm" id="btnAiPreview" title="预览即将注入给AI的小说世界观上下文">👁 预览注入</button>
               <button class="btn btn-sm" id="btnAiClear">清</button>
             </div>
             <div class="ai-settings">
@@ -178,14 +180,42 @@
       <div class="modal-row-3">
         <div><label>姓名 *</label><input id="char-name" placeholder="角色名"></div>
         <div><label>身份定位</label><input id="char-title" placeholder="如：主角 / 穿越者"></div>
-        <div><label>生死状态</label>
-          <select id="char-status"><option value="alive">存活</option><option value="dead">已故</option><option value="soul">残魂</option><option value="unknown">下落不明</option></select>
+        <div><label>当下/最终态（快捷）</label>
+          <select id="char-status">
+            <option value="alive">存活</option>
+            <option value="dying">垂死</option>
+            <option value="dead">已故</option>
+            <option value="soul">残魂</option>
+            <option value="spirit">妖鬼</option>
+            <option value="reincarnated">已转世</option>
+            <option value="not_yet_born">未出生</option>
+            <option value="unknown">下落不明</option>
+          </select>
         </div>
       </div>
       <label>标签（逗号分隔）</label><input id="char-tags" placeholder="28岁，前会计，理性有底线">
       <label>简介</label><textarea id="char-summary" rows="2" placeholder="一两句话概括这个角色"></textarea>
-      <label>详细信息（每行一条，"键：值"格式）</label>
-      <textarea id="char-details" rows="6" placeholder="性格：理性有底线，吃软不吃硬&#10;能力：通幽、驱神、斩妖&#10;装备：青布道袍、刻字剑&#10;名言：我一个会计，你让我学这？"></textarea>
+
+      <!-- ===== 生死轨迹（新增） ===== -->
+      <div style="margin-top:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label style="margin:0;font-weight:600">⏱ 生死轨迹（每行一段：阶段 → 状态 · 描述）</label>
+          <span id="char-tl-helper" style="font-size:10px;color:#64748b;cursor:pointer;text-decoration:underline">▼ 插入章节标记</span>
+        </div>
+        <div class="modal-row" style="margin-bottom:6px">
+          <div><label style="font-size:11px">首次登场</label><input id="char-first-appear" placeholder="如：ch_an1_1 / 案一第1章 / BACKSTORY"></div>
+          <div><label style="font-size:11px">最后登场</label><input id="char-last-appear" placeholder="如：ch_an1_7 / END"></div>
+        </div>
+        <textarea id="char-status-timeline" rows="6" style="font-family:Consolas,monospace;font-size:12px" placeholder="ch_an1_1 → ch_an1_5 : alive · 随主角同行
+ch_an1_5 → ch_an1_7 : dying · 火墙抽干最后一口气
+ch_an1_7 → END      : dead · 已埋葬，剑尖刻名
+
+# 状态词典：alive存活 / dying垂死 / dead已故 / soul残魂 / spirit妖鬼 / reincarnated已转世 / not_yet_born未出生 / unknown下落不明
+# 也支持中文写法：案一第1~5章：存活·随主角同行"></textarea>
+      </div>
+
+      <label style="margin-top:10px">详细信息（每行一条，"键：值"格式）</label>
+      <textarea id="char-details" rows="5" placeholder="性格：理性有底线，吃软不吃硬&#10;能力：通幽、驱神、斩妖&#10;装备：青布道袍、刻字剑&#10;名言：我一个会计，你让我学这？"></textarea>
     </div>
     <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveChar">保存</button></div>
   </div>

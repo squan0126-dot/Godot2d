@@ -1,106 +1,44 @@
-[
-  {
-    "id": "tl_755",
-    "title": "安史之乱（背景）",
-    "time": "755-763年",
-    "importance": "high",
-    "desc": "藩镇割据、宦官专权、经济重心南移——三个根本问题全部由此开始。唐朝由盛转衰的转折点。",
-    "chars": ""
+{
+  "_meta": {
+    "purpose": "时间不是线性的——本作至少有4条并行时间轴。",
+    "tracks_def": {
+      "history":     "现实历史轴（绝对时间，唐末→五代→宋初）",
+      "protagonist": "主角主观轴（按章节顺序，受穿越跳跃影响）",
+      "anXian":      "暗线·令使-玉佩-赵匡胤（散落在各案，最后闭合）",
+      "biography":   "角色生平轴（每个角色一条）"
+    }
   },
-  {
-    "id": "tl_875",
-    "title": "黄巢起义爆发",
-    "time": "875年",
-    "importance": "high",
-    "desc": "天下大乱的起点，妖鬼横行的社会根源。",
-    "chars": ""
-  },
-  {
-    "id": "tl_880",
-    "title": "黄巢入长安",
-    "time": "880年",
-    "importance": "high",
-    "desc": "长安沦为废墟——废墟中留存了无数亡灵与执念。",
-    "chars": ""
-  },
-  {
-    "id": "tl_884",
-    "title": "黄巢死·溃兵流散",
-    "time": "884年",
-    "importance": "high",
-    "desc": "起义结束，唐朝彻底失去控制力。赵都头带七人逃到汴州，开始吃人。",
-    "chars": "赵都头"
-  },
-  {
-    "id": "tl_907",
-    "title": "唐朝灭亡·后梁建立",
-    "time": "907年",
-    "importance": "high",
-    "desc": "五代十国正式开始。朱温篡唐。",
-    "chars": ""
-  },
-  {
-    "id": "tl_an1",
-    "title": "案一：汴州·饿妖",
-    "time": "907年深秋",
-    "importance": "high",
-    "desc": "主角穿越落地→遇玄义老道→学艺→饿妖之战→师父牺牲→继承衣钵→解锁通幽",
-    "chars": "李归舟,玄义老道,赵都头"
-  },
-  {
-    "id": "tl_an2",
-    "title": "案二：洛阳·冻土饿鬼",
-    "time": "908年隆冬",
-    "importance": "medium",
-    "desc": "乱葬岗饿鬼等祭祀→说服村民集体祭祀→士兵鬼与母亲重逢→解锁驱神",
-    "chars": "李归舟"
-  },
-  {
-    "id": "tl_an3",
-    "title": "案三：钱塘·老蛟",
-    "time": "909年夏",
-    "importance": "medium",
-    "desc": "被遗忘的水神→帮它恢复神位→解锁禁水。首次隐约感知玉佩里有意识。",
-    "chars": "李归舟,老蛟"
-  },
-  {
-    "id": "tl_an4",
-    "title": "案四：太原·两棵杏树",
-    "time": "910年春",
-    "importance": "medium",
-    "desc": "三十年冤案→当众揭露真相→杏花变白→解锁斩妖",
-    "chars": "李归舟"
-  },
-  {
-    "id": "tl_an5",
-    "title": "案五：燕云·守碑人",
-    "time": "912年晚秋",
-    "importance": "medium",
-    "desc": "二十年守卒→'你的任务完成了'→解锁借风",
-    "chars": "李归舟,守碑老人"
-  },
-  {
-    "id": "tl_912",
-    "title": "朱温被弑",
-    "time": "912年",
-    "importance": "low",
-    "desc": "暴君恐怖死亡，宫廷亡魂。可作为案件背景。",
-    "chars": ""
-  },
-  {
-    "id": "tl_936",
-    "title": "燕云十六州割让",
-    "time": "936年",
-    "importance": "high",
-    "desc": "石敬瑭把中原的城墙拆了送人。此后186年中原活在契丹铁骑阴影下。案10可用。",
-    "chars": ""
-  },
-  {
-    "id": "tl_960",
-    "title": "陈桥兵变·北宋建立",
-    "time": "960年正月",
-    "importance": "high",
-    "desc": "残魂投胎为赵匡胤的时间点。全篇终点。玉佩刻痕亮满→残魂完整→投胎→历史闭环完成。",
-    "chars": "李归舟,赵匡胤前世"
-  }
-]
+  "tracks": [
+    { "id": "history",     "name": "现实历史轴",      "color": "#94a3b8" },
+    { "id": "protagonist", "name": "主角主观轴",      "color": "#7c6af7" },
+    { "id": "anXian",      "name": "暗线·令使-玉佩", "color": "#a78bfa" },
+    { "id": "bio_xuanyi",  "name": "玄义生平",        "color": "#60a5fa" }
+  ],
+  "events": [
+    { "id": "tl_755",  "track": "history",     "time": "755-763年", "absoluteYear": 755, "title": "安史之乱（背景）", "importance": "high", "desc": "藩镇割据、宦官专权、经济重心南移——三个根本问题全部由此开始。唐朝由盛转衰的转折点。", "chars": "" },
+    { "id": "tl_875",  "track": "history",     "time": "875年",     "absoluteYear": 875, "title": "黄巢起义爆发", "importance": "high", "desc": "天下大乱的起点，妖鬼横行的社会根源。", "chars": "" },
+    { "id": "tl_880",  "track": "history",     "time": "880年",     "absoluteYear": 880, "title": "黄巢入长安", "importance": "high", "desc": "长安沦为废墟——废墟中留存了无数亡灵与执念。", "chars": "" },
+    { "id": "tl_884",  "track": "history",     "time": "884年",     "absoluteYear": 884, "title": "黄巢死·溃兵流散", "importance": "high", "desc": "起义结束。赵都头带七人逃到汴州，开始吃人。", "chars": "char_zhaodutou" },
+    { "id": "tl_907",  "track": "history",     "time": "907年",     "absoluteYear": 907, "title": "唐朝灭亡·后梁建立", "importance": "high", "desc": "五代十国正式开始。朱温篡唐。", "chars": "" },
+    { "id": "tl_912",  "track": "history",     "time": "912年",     "absoluteYear": 912, "title": "朱温被弑", "importance": "low", "desc": "暴君恐怖死亡，宫廷亡魂。可作为案件背景。", "chars": "" },
+    { "id": "tl_936",  "track": "history",     "time": "936年",     "absoluteYear": 936, "title": "燕云十六州割让", "importance": "high", "desc": "石敬瑭把中原的城墙拆了送人。", "chars": "" },
+    { "id": "tl_960",  "track": "history",     "time": "960年正月", "absoluteYear": 960, "title": "陈桥兵变·北宋建立", "importance": "high", "desc": "赵匡胤称帝。", "chars": "char_zhaoky" },
+
+    { "id": "tl_an1",  "track": "protagonist", "time": "案一·907年深秋", "linkChapter": "ch_an1_1", "title": "案一：汴州·饿妖", "importance": "high", "desc": "穿越落地→遇玄义→学艺→饿妖之战→师父牺牲→继承衣钵→解锁通幽", "chars": "char_ligz,char_xuanyi,char_zhaodutou" },
+    { "id": "tl_an2",  "track": "protagonist", "time": "案二·908年隆冬", "linkChapter": "ch_an2_1", "title": "案二：洛阳·冻土饿鬼", "importance": "medium", "desc": "乱葬岗饿鬼等祭祀→说服村民集体祭祀→解锁驱神", "chars": "char_ligz" },
+    { "id": "tl_an3",  "track": "protagonist", "time": "案三·909年夏",   "linkChapter": "ch_an3_1", "title": "案三：钱塘·老蛟", "importance": "medium", "desc": "被遗忘的水神→恢复神位→解锁禁水。首次隐约感知玉佩里有意识。", "chars": "char_ligz,char_laojiao" },
+    { "id": "tl_an4",  "track": "protagonist", "time": "案四·910年春",   "linkChapter": "ch_an4_1", "title": "案四：太原·两棵杏树", "importance": "medium", "desc": "三十年冤案→当众揭露真相→解锁斩妖", "chars": "char_ligz" },
+    { "id": "tl_an5",  "track": "protagonist", "time": "案五·912年晚秋", "linkChapter": "ch_an5_1", "title": "案五：燕云·守碑人", "importance": "medium", "desc": "二十年守卒→执念解除→解锁借风", "chars": "char_ligz,char_shoubei" },
+
+    { "id": "tl_ax_yp_appear", "track": "anXian", "time": "案一·开篇", "linkChapter": "ch_an1_1", "title": "玉佩出现", "importance": "high", "desc": "穿越落地时玉佩在水杯旁凭空出现，无法解释。", "chars": "char_ligz" },
+    { "id": "tl_ax_ls_meet",   "track": "anXian", "time": "案?·令使登场", "title": "令使首次登场", "importance": "high", "desc": "镇魂司游击与主角偶遇，互相试探。", "chars": "char_ligz,char_lingshi" },
+    { "id": "tl_ax_ls_die",    "track": "anXian", "time": "案?·令使战死", "title": "令使战死，残魂入玉", "importance": "critical", "desc": "用尽法力对大妖，残魂被玉佩吸收。主角以为他死了。", "chars": "char_lingshi", "spoilerWarn": true },
+    { "id": "tl_ax_ls_wake",   "track": "anXian", "time": "案?·玉佩传声", "title": "令使在玉佩中苏醒", "importance": "critical", "desc": "玉佩传来声音，主角愣住、笑了、骂了一句。", "chars": "char_ligz,char_lingshi" },
+    { "id": "tl_ax_yp_full",   "track": "anXian", "time": "终章", "linkChapter": "ch_final", "title": "玉佩刻痕亮满，残魂投胎", "importance": "critical", "desc": "令使残魂散去，投胎为赵匡胤。主角想起'王者之气'那句话。", "chars": "char_ligz,char_lingshi,char_zhaoky" },
+
+    { "id": "tl_bio_xy_chongwei", "track": "bio_xuanyi", "time": "玄义年轻时", "title": "随冲微学艺", "importance": "low", "desc": "师承冲微，无门无派云游派系。", "chars": "char_xuanyi,char_chongwei" },
+    { "id": "tl_bio_xy_jiao",     "track": "bio_xuanyi", "time": "玄义中年",   "title": "冲微死于蛟嘴", "importance": "medium", "desc": "玄义独行的开始。", "chars": "char_xuanyi,char_chongwei" },
+    { "id": "tl_bio_xy_meet",     "track": "bio_xuanyi", "time": "案一·907秋", "linkChapter": "ch_an1_1", "title": "遇李归舟", "importance": "high", "desc": "施粥时注意到玉佩，傍晚发现他能见鬼。", "chars": "char_xuanyi,char_ligz" },
+    { "id": "tl_bio_xy_die",      "track": "bio_xuanyi", "time": "案一·907秋", "linkChapter": "ch_an1_5", "title": "为护徒牺牲", "importance": "critical", "desc": "火墙抽干最后一口气。", "chars": "char_xuanyi" }
+  ]
+}

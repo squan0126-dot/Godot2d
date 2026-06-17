@@ -12,8 +12,10 @@ let DB = {
   plots: { columns:['第一幕·起','第二幕·承','第三幕·转','第四幕·合'], cards:[] },
   hooks: [],
   reversals: [],
-  timeline: [],
+  timeline: [],          // 仍兼容数组形态：每条事件
+  timelineTracks: [],    // 多轨道定义（id/name/color），可为空
   materials: [],
+  knowledgeMap: { facts: [] },  // 三视角信息差地图（reader/protagonist/角色自身）
 };
 
 // ===== 存储 =====
@@ -22,7 +24,9 @@ const Store = {
     project:'ns_project', chapters:'ns_chapters', characters:'ns_characters',
     relations:'ns_relations', locations:'ns_locations', plots:'ns_plots',
     hooks:'ns_hooks', reversals:'ns_reversals', timeline:'ns_timeline',
-    materials:'ns_materials', currentChapter:'ns_current_chapter',
+    timelineTracks:'ns_timeline_tracks',
+    materials:'ns_materials', knowledgeMap:'ns_knowledge_map',
+    currentChapter:'ns_current_chapter',
     ollamaUrl:'ns_ollama_url', ollamaModel:'ns_ollama_model', aiHistory:'ns_ai_history',
   },
   load(key) {
@@ -47,6 +51,7 @@ const Store = {
       chapters: 'data/chapters.json',
       materials: 'data/materials.json',
       settings: 'data/settings.json',
+      knowledgeMap: 'data/knowledgeMap.json',
     };
     const results = {};
     await Promise.all(Object.entries(fileMap).map(async ([key, path]) => {
@@ -99,7 +104,8 @@ const App = {
   _rightTab: 'tools',
   _charEditMode: false,
   _editingId: null,
-  _toolView: 'dashboard', // dashboard | chars | relations | locations | plots | hooks | reversals | timeline | materials | analytics
+  _toolView: 'dashboard', // dashboard | chars | relations | locations | plots | hooks | reversals | timeline | materials | analytics | viewpoint
+  _viewpoint: 'protagonist', // 当前视角：reader / protagonist / lingshi / author
 
   init() {
     Store.loadAll();
@@ -163,6 +169,11 @@ const App = {
           name: c.name || '',
           title: c.title || c.role || '',
           status: c.status || 'alive',
+          // === 时间线状态轨迹（关键升级） ===
+          currentStatus: c.currentStatus || c.status || 'alive',
+          firstAppear: c.firstAppear || '',
+          lastAppear: c.lastAppear || '',
+          statusTimeline: Array.isArray(c.statusTimeline) ? c.statusTimeline : [],
           color: c.color || '#6366f1',
           tags,
           summary: c.summary || c.desc || '',
@@ -200,7 +211,7 @@ const App = {
     }
 
     // ---- chapters ----
-    // 旧字段基本一致，多了 target/locs，缺 wordCount
+    // 旧字段基本一致，多了 target/locs，缺 wordCount；新增 aiContext（章节级AI写作守则）
     if (Array.isArray(files.chapters)) {
       DB.chapters = files.chapters.map(c => ({
         id: c.id || genId(),
@@ -211,6 +222,7 @@ const App = {
         summary: c.summary || '',
         outline: c.outline || '',
         content: c.content || '',
+        aiContext: c.aiContext && typeof c.aiContext === 'object' ? c.aiContext : null,
         wordCount: c.wordCount || (c.content ? c.content.replace(/[\s\n\r，。！？；：、""''「」『』【】《》（）—…\.\,\!\?\;\:\"\'\(\)\[\]\{\}]/g, '').length : 0),
       }));
     }
@@ -245,17 +257,36 @@ const App = {
     }
 
     // ---- timeline ----
-    // 旧字段：importance(high/medium/low) → 新字段：level(major/normal/minor)
-    if (Array.isArray(files.timeline)) {
-      const levelMap = { high: 'major', medium: 'normal', low: 'minor' };
-      DB.timeline = files.timeline.map(t => ({
+    // 兼容两种结构：旧=数组；新={tracks:[], events:[]} 多轨道
+    // 字段：importance(high/medium/low/critical) → level(major/normal/minor)
+    {
+      const levelMap = { high: 'major', medium: 'normal', low: 'minor', critical: 'major' };
+      const normalize = t => ({
         id: t.id || genId(),
         time: t.time || t.date || '',
         title: t.title || '',
         level: levelMap[t.importance] || t.level || 'normal',
         desc: t.desc || '',
         chars: t.chars || '',
-      }));
+        track: t.track || 'history',
+        linkChapter: t.linkChapter || '',
+        absoluteYear: typeof t.absoluteYear === 'number' ? t.absoluteYear : null,
+        spoilerWarn: !!t.spoilerWarn,
+      });
+      const tl = files.timeline;
+      if (Array.isArray(tl)) {
+        DB.timeline = tl.map(normalize);
+        DB.timelineTracks = [];
+      } else if (tl && typeof tl === 'object' && Array.isArray(tl.events)) {
+        DB.timeline = tl.events.map(normalize);
+        DB.timelineTracks = Array.isArray(tl.tracks) ? tl.tracks.slice() : [];
+      }
+    }
+
+    // ---- knowledgeMap（三视角信息差地图）----
+    if (files.knowledgeMap && typeof files.knowledgeMap === 'object') {
+      const facts = Array.isArray(files.knowledgeMap.facts) ? files.knowledgeMap.facts : [];
+      DB.knowledgeMap = { facts, _meta: files.knowledgeMap._meta || null };
     }
 
     // ---- materials ----
@@ -451,6 +482,7 @@ const App = {
         ${tags.length ? `<div class="char-tags">${tags.map(t=>`<span class="char-tag">${esc(t)}</span>`).join('')}</div>` : ''}
         ${ch.summary ? `<div class="char-summary">${esc(ch.summary)}</div>` : ''}
         ${hasDetails ? `<div class="char-details">${detailsHtml}</div><div class="char-expand-hint">▼ 点击展开</div>` : ''}
+        ${this._charTimelineBar(ch)}
       `;
 
       if (!this._charEditMode) {
@@ -492,9 +524,38 @@ const App = {
   _renderEditor() {
     const ch = DB.chapters.find(c => c.id === this._currentChapterId);
     const titleEl = document.getElementById('editorTitle');
-    if (!ch) { titleEl.textContent = '请从左侧选择章节开始写作'; return; }
+    const bar = document.getElementById('aiContextBar');
+    if (!ch) {
+      titleEl.textContent = '请从左侧选择章节开始写作';
+      if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
+      return;
+    }
     const i = DB.chapters.indexOf(ch);
     titleEl.textContent = `第${i+1}章 · ${ch.title}`;
+    // 渲染 aiContext 守则条
+    if (bar) {
+      const ac = ch.aiContext;
+      if (!ac) { bar.style.display = 'none'; bar.innerHTML = ''; }
+      else {
+        const nameOf = id => (DB.characters.find(c => c.id === id)?.name) || id;
+        const arr = (key, label, color) => {
+          const v = ac[key]; if (!Array.isArray(v) || !v.length) return '';
+          return `<span style="margin-right:10px"><b style="color:${color}">${label}</b> ${v.map(nameOf).map(esc).join('、')}</span>`;
+        };
+        const parts = [
+          arr('alive','✅在场存活','#10b981'),
+          arr('dying','⚠️垂死','#f59e0b'),
+          arr('dead','💀已故','#6b7280'),
+          arr('spirit','👻妖鬼','#ef4444'),
+          arr('absent','—缺席','#94a3b8'),
+        ].filter(Boolean).join('');
+        const dnm = Array.isArray(ac.doNotMention) && ac.doNotMention.length
+          ? `<div style="margin-top:3px"><b style="color:#dc2626">🚫 本章不得提及：</b>${ac.doNotMention.map(esc).join('、')}</div>` : '';
+        const tone = ac.tone ? `<div style="margin-top:3px"><b>🎭 基调：</b>${esc(ac.tone)}</div>` : '';
+        bar.innerHTML = parts + dnm + tone;
+        bar.style.display = (parts || dnm || tone) ? 'block' : 'none';
+      }
+    }
   },
 
   _selectChapter(chapterId) {
@@ -558,6 +619,7 @@ const App = {
       timeline: () => this._renderTimelineView(container),
       materials: () => this._renderMaterialsView(container),
       analytics: () => this._renderAnalyticsView(container),
+      viewpoint: () => this._renderViewpointView(container),
     };
     views[this._toolView]?.();
   },
@@ -584,8 +646,8 @@ const App = {
     const items = [
       ['dashboard','🏠','总览'],['chars','👥','人物'],['relations','🕸️','关系'],
       ['locations','📍','地点'],['plots','📋','情节'],['hooks','🪝','钩子'],
-      ['reversals','🔄','反转'],['timeline','📅','时间线'],['materials','🗂️','素材'],
-      ['analytics','📊','分析'],
+      ['reversals','🔄','反转'],['timeline','📅','时间线'],['viewpoint','🔮','视角'],
+      ['materials','🗂️','素材'],['analytics','📊','分析'],
     ];
     return `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">
       ${items.map(([v,icon,label]) => `
@@ -669,6 +731,7 @@ const App = {
         ${tags.length ? `<div class="char-tags">${tags.map(t=>`<span class="char-tag">${esc(t)}</span>`).join('')}</div>` : ''}
         ${ch.summary ? `<div class="char-summary">${esc(ch.summary)}</div>` : ''}
         ${Object.keys(details).length ? `<div class="char-details">${detailsHtml}</div><div class="char-expand-hint">▼ 点击展开</div>` : ''}
+        ${this._charTimelineBar(ch)}
       `;
       card.addEventListener('click', e => {
         if (e.target.dataset.action) return;
@@ -696,14 +759,32 @@ const App = {
   },
 
   _renderRelationsView(container) {
+    const mode = this._relViewMode || 'list';
     container.innerHTML = this._toolNav('relations') + `
-      <div style="display:flex;gap:6px;margin-bottom:8px">
+      <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
         <button class="btn btn-sm btn-primary" style="flex:1" onclick="App._openRelModal()">＋ 添加关系</button>
+        <div class="btn-group" style="display:flex;gap:2px">
+          <button class="btn btn-sm ${mode==='list'?'btn-primary':''}" id="rel-mode-list">📋 列表</button>
+          <button class="btn btn-sm ${mode==='graph'?'btn-primary':''}" id="rel-mode-graph">🕸 网图</button>
+        </div>
+        <button class="btn btn-sm" id="rel-fullscreen" title="全屏查看网图">⛶</button>
       </div>
-      <div id="rel-view-list"></div>
+      <div id="rel-view-body"></div>
     `;
-    const list = container.querySelector('#rel-view-list');
-    if (!DB.relations.length) { list.innerHTML = '<div class="template-empty">还没有关系</div>'; return; }
+    container.querySelector('#rel-mode-list').onclick = () => { this._relViewMode = 'list'; this._renderToolsPanel(); };
+    container.querySelector('#rel-mode-graph').onclick = () => { this._relViewMode = 'graph'; this._renderToolsPanel(); };
+    container.querySelector('#rel-fullscreen').onclick = () => this._openRelGraphFullscreen();
+
+    const body = container.querySelector('#rel-view-body');
+    if (!DB.relations.length) { body.innerHTML = '<div class="template-empty">还没有关系</div>'; return; }
+
+    if (mode === 'graph') {
+      body.innerHTML = this._renderRelGraphSVG(360, 360);
+      this._wireRelGraphEvents(body);
+      return;
+    }
+
+    // 列表模式
     DB.relations.forEach(r => {
       const cA = DB.characters.find(c => c.id === r.charA);
       const cB = DB.characters.find(c => c.id === r.charB);
@@ -729,8 +810,96 @@ const App = {
           this._toast('关系已删除');
         }
       });
-      list.appendChild(item);
+      body.appendChild(item);
     });
+  },
+
+  // ====== 关系网图 SVG 渲染 ======
+  _relTypeColor(t) {
+    return { '血缘':'#dc2626','爱情':'#ec4899','友情':'#10b981','仇恨':'#7c2d12','师徒':'#7c6af7','主仆':'#6b7280','利益':'#f59e0b','对手':'#ef4444' }[t] || '#94a3b8';
+  },
+
+  // 用环形布局把所有人物布到圆周上，关系画成弧线
+  _renderRelGraphSVG(w, h) {
+    const chars = DB.characters;
+    const rels = DB.relations;
+    if (!chars.length) return '<div class="template-empty">先创建人物</div>';
+    const cx = w/2, cy = h/2;
+    const R = Math.min(w,h)/2 - 50;
+    const pos = {};
+    chars.forEach((c, i) => {
+      const a = (i / chars.length) * Math.PI * 2 - Math.PI/2;
+      pos[c.id] = { x: cx + R*Math.cos(a), y: cy + R*Math.sin(a), name: c.name };
+    });
+    // 边：同一对人物多条关系平行展开
+    const pairCount = {}; // "a|b" -> seen count
+    const edges = rels.map(r => {
+      const key = [r.charA, r.charB].sort().join('|');
+      pairCount[key] = (pairCount[key]||0) + 1;
+      return { ...r, _seen: pairCount[key] };
+    });
+    const totalPair = {}; rels.forEach(r => { const k=[r.charA,r.charB].sort().join('|'); totalPair[k]=(totalPair[k]||0)+1; });
+    const lines = edges.map(r => {
+      const A = pos[r.charA], B = pos[r.charB];
+      if (!A || !B) return '';
+      const c = this._relTypeColor(r.type);
+      const total = totalPair[[r.charA,r.charB].sort().join('|')];
+      const offset = (r._seen - (total+1)/2) * 12; // 多关系横向偏移
+      const mx = (A.x+B.x)/2, my = (A.y+B.y)/2;
+      const dx = B.x-A.x, dy = B.y-A.y;
+      const len = Math.sqrt(dx*dx+dy*dy) || 1;
+      const nx = -dy/len * offset, ny = dx/len * offset;
+      const ctrlX = mx + nx, ctrlY = my + ny;
+      const label = r.type === '自定义' ? (r.custom || '关系') : r.type;
+      return `
+        <path d="M ${A.x} ${A.y} Q ${ctrlX} ${ctrlY} ${B.x} ${B.y}" stroke="${c}" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <text x="${ctrlX}" y="${ctrlY}" font-size="9" fill="${c}" text-anchor="middle" style="paint-order:stroke;stroke:#fff;stroke-width:3px">${esc(label)}</text>
+      `;
+    }).join('');
+    const nodes = chars.map(c => {
+      const p = pos[c.id];
+      const isProtag = /主角|protagonist/i.test(c.title || c.role || '');
+      const fill = isProtag ? '#7c6af7' : '#475569';
+      return `
+        <g class="rg-node" data-id="${c.id}" style="cursor:pointer">
+          <circle cx="${p.x}" cy="${p.y}" r="14" fill="${fill}" stroke="#fff" stroke-width="2"/>
+          <text x="${p.x}" y="${p.y+28}" font-size="11" fill="var(--text)" text-anchor="middle" style="paint-order:stroke;stroke:var(--bg,#fff);stroke-width:3px">${esc(c.name)}</text>
+        </g>
+      `;
+    }).join('');
+    return `<div style="background:var(--bg-soft,#f8fafc);border:1px solid var(--border);border-radius:6px;padding:4px">
+      <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block">${lines}${nodes}</svg>
+      <div style="font-size:10px;color:var(--text-muted);text-align:center;padding:2px">共 ${chars.length} 人 · ${rels.length} 条关系（点节点查看详情，⛶全屏查看）</div>
+    </div>`;
+  },
+
+  _wireRelGraphEvents(root) {
+    root.querySelectorAll('.rg-node').forEach(g => {
+      g.addEventListener('click', () => {
+        const id = g.getAttribute('data-id');
+        this._openCharModal(id);
+      });
+    });
+  },
+
+  // 全屏查看关系网图
+  _openRelGraphFullscreen() {
+    let dlg = document.getElementById('modal-rel-graph');
+    if (!dlg) {
+      dlg = document.createElement('div');
+      dlg.className = 'modal-overlay';
+      dlg.id = 'modal-rel-graph';
+      dlg.innerHTML = `<div class="modal-box" style="max-width:90vw;width:90vw;max-height:90vh;height:90vh;display:flex;flex-direction:column">
+        <div class="modal-header"><span>🕸 人物关系网图</span><button class="btn btn-sm" id="rgClose">✕</button></div>
+        <div class="modal-body" id="rgBody" style="flex:1;overflow:auto"></div>
+      </div>`;
+      document.body.appendChild(dlg);
+      dlg.querySelector('#rgClose').onclick = () => dlg.classList.remove('show');
+    }
+    const body = dlg.querySelector('#rgBody');
+    body.innerHTML = this._renderRelGraphSVG(900, 700);
+    this._wireRelGraphEvents(body);
+    dlg.classList.add('show');
   },
 
   _renderLocationsView(container) {
@@ -946,6 +1115,173 @@ const App = {
     });
   },
 
+  // ===== 🔮 视角面板：基于当前章节，显示三视角的"已知 / 未知 / 即将得知" =====
+  _renderViewpointView(container) {
+    const facts = (DB.knowledgeMap && Array.isArray(DB.knowledgeMap.facts)) ? DB.knowledgeMap.facts : [];
+    const curId = this._currentChapterId || '';
+    const curIdx = DB.chapters.findIndex(c => c.id === curId);
+    const curCh = curIdx >= 0 ? DB.chapters[curIdx] : null;
+
+    // 给 chapter id 排序号，用于 from 比较：ch_an1_1 < ch_an1_2 < ... 用 chapter index；非章节id（如"案?_战死"）按字符串比
+    const chOrder = {}; DB.chapters.forEach((c,i) => chOrder[c.id] = i);
+    const isKnownAt = (fromVal, atChapterId) => {
+      if (!fromVal) return false;
+      if (fromVal === 'ALWAYS') return true;
+      if (fromVal === 'NEVER' || fromVal === 'END') return false;
+      // 章节id比较
+      if (chOrder[fromVal] !== undefined && chOrder[atChapterId] !== undefined) {
+        return chOrder[atChapterId] >= chOrder[fromVal];
+      }
+      // 否则当作模糊标记，未知 → 视为"未到"
+      return false;
+    };
+
+    const vpDef = [
+      { id:'reader',      icon:'📖', name:'读者',      desc:'按章节顺序逐步获取信息' },
+      { id:'protagonist', icon:'🧍', name:'主角·李归舟', desc:'最容易被AI写错的视角' },
+      { id:'lingshi',     icon:'⚔️', name:'令使',      desc:'残魂自己的认知历程' },
+      { id:'author',      icon:'✍️', name:'作者全知',   desc:'基准答案，永远=true' },
+    ];
+    const vp = this._viewpoint || 'protagonist';
+
+    const chapterPicker = `
+      <div style="margin-bottom:10px;padding:8px;background:var(--bg-soft);border-radius:6px;font-size:11px">
+        <div style="margin-bottom:4px;color:var(--text-muted)">📍 当前考察章节：</div>
+        <select id="vp-chapter-pick" style="width:100%">
+          ${DB.chapters.map((c,i) => `<option value="${c.id}" ${c.id===curId?'selected':''}>第${i+1}章 · ${esc(c.title)}</option>`).join('') || '<option>（暂无章节）</option>'}
+        </select>
+      </div>`;
+
+    const vpSwitcher = `
+      <div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap">
+        ${vpDef.map(v => `
+          <button class="btn btn-sm ${v.id===vp?'btn-primary':''}" onclick="App._setViewpoint('${v.id}')" style="font-size:11px;padding:4px 8px">
+            ${v.icon} ${v.name}
+          </button>`).join('')}
+      </div>`;
+
+    let body = '';
+    if (!facts.length) {
+      body = '<div class="template-empty">暂无信息差地图。请编辑 data/knowledgeMap.json</div>';
+    } else if (!curCh) {
+      body = '<div class="template-empty">请先在左侧选择一个章节</div>';
+    } else {
+      const known = [], unknown = [], soon = [];
+      facts.forEach(f => {
+        const kb = (f.knownBy || {})[vp];
+        if (!kb) {
+          // 该视角无定义 → 默认未知
+          unknown.push({ f, reason:'（该视角无明确定义）' });
+          return;
+        }
+        if (isKnownAt(kb.from, curCh.id)) known.push({ f, kb });
+        else {
+          // 是否即将得知（下一章）
+          const next = curIdx >= 0 && curIdx+1 < DB.chapters.length ? DB.chapters[curIdx+1].id : null;
+          if (next && isKnownAt(kb.from, next)) soon.push({ f, kb });
+          else unknown.push({ f, kb });
+        }
+      });
+
+      const renderGroup = (title, color, list, hint) => {
+        if (!list.length) return '';
+        return `
+          <div style="margin-bottom:14px">
+            <div style="font-size:11px;font-weight:600;color:${color};margin-bottom:6px">${title}（${list.length}）</div>
+            ${hint?`<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">${hint}</div>`:''}
+            ${list.map(({f,kb,reason}) => `
+              <div style="padding:6px 8px;margin-bottom:4px;background:var(--bg-soft);border-left:3px solid ${color};border-radius:4px;font-size:11px">
+                <div style="font-weight:500;margin-bottom:2px">${esc(f.fact)}</div>
+                ${kb&&kb.from?`<div style="font-size:10px;color:var(--text-muted)">从 <b>${esc(this._chapterIdToZh(kb.from))}</b> 起知晓${kb.note?' · '+esc(kb.note):''}</div>`:''}
+                ${reason?`<div style="font-size:10px;color:var(--text-muted)">${esc(reason)}</div>`:''}
+                ${f.warning?`<div style="font-size:10px;color:#ef4444;margin-top:2px">⚠ ${esc(f.warning)}</div>`:''}
+              </div>`).join('')}
+          </div>`;
+      };
+
+      body = `
+        <div style="padding:6px;background:#fef3c7;border-radius:4px;font-size:11px;color:#78350f;margin-bottom:10px">
+          ⚠ <b>AI 写作守则</b>：写【${esc(curCh.title)}】时，"未知"区的事实<b>不得</b>从该视角的内心戏/对白中流出。
+        </div>
+        ${renderGroup('🚫 此刻 *未知*', '#ef4444', unknown, '写本章时绝对不要让此视角提及/暗示这些事实')}
+        ${renderGroup('⏳ 即将得知（下一章）', '#f59e0b', soon, '可在本章末尾埋伏笔')}
+        ${renderGroup('✅ 已知', '#10b981', known)}
+      `;
+    }
+
+    container.innerHTML = this._toolNav('viewpoint') + chapterPicker + vpSwitcher + body;
+
+    container.querySelector('#vp-chapter-pick')?.addEventListener('change', e => {
+      this._currentChapterId = e.target.value;
+      Store.setCurrentChapter(e.target.value);
+      this._renderToolsPanel();
+    });
+  },
+
+  _setViewpoint(v) {
+    this._viewpoint = v;
+    this._renderToolsPanel();
+  },
+
+  // 状态英文 → 中文（带emoji，用于人物卡叙事化展示）
+  _statusZh(st) {
+    const M = {
+      alive:'🟢存活', dying:'🟠垂死', dead:'⚫已故', soul:'🟣残魂',
+      spirit:'🔴妖鬼', reincarnated:'🟡已转世', not_yet_born:'⚪未出生', unknown:'❔不明'
+    };
+    return M[st] || ('❔'+st);
+  },
+
+  // 把章节id翻译成"案一第5章"这种人话；非章节id原样返回
+  _chapterIdToZh(id) {
+    if (!id) return '?';
+    if (id === 'BACKSTORY') return '故事开始前';
+    if (id === 'END') return '直到完结';
+    if (id === 'ALWAYS') return '全程';
+    if (id === 'NEVER') return '从未';
+    const idx = DB.chapters.findIndex(c => c.id === id);
+    if (idx >= 0) return `第${idx+1}章·${DB.chapters[idx].title}`;
+    return id; // 自由文本如"案?_战死"原样
+  },
+
+  // 人物状态轨迹条：可视化色块 + 叙事化人话
+  _charTimelineBar(ch) {
+    const tl = Array.isArray(ch.statusTimeline) ? ch.statusTimeline : [];
+    if (!tl.length) return '';
+    const colorMap = {
+      alive:'#10b981', dying:'#f59e0b', dead:'#6b7280', soul:'#a78bfa',
+      reincarnated:'#fbbf24', spirit:'#ef4444', not_yet_born:'#cbd5e1', unknown:'#94a3b8'
+    };
+    // 色条
+    const segs = tl.map(s => {
+      const c = colorMap[s.status] || '#94a3b8';
+      const tip = `${this._chapterIdToZh(s.from)} → ${this._chapterIdToZh(s.to)}：${this._statusZh(s.status)}${s.form?'('+s.form+')':''}${s.note?' · '+s.note:''}`;
+      return `<div title="${esc(tip)}" style="flex:1;height:8px;background:${c};min-width:6px"></div>`;
+    }).join('');
+    // 叙事化人话：每段两行（时段在上，状态在下），不会被挤出卡片
+    const stories = tl.map(s => {
+      const fromZh = this._chapterIdToZh(s.from);
+      const toZh   = this._chapterIdToZh(s.to);
+      const range  = (s.from === s.to) ? fromZh : `${fromZh} → ${toZh}`;
+      const stZh   = this._statusZh(s.status);
+      const form   = s.form ? `（${esc(s.form)}）` : '';
+      const note   = s.note ? `<span style="color:var(--text-muted)"> · ${esc(s.note)}</span>` : '';
+      const know   = s.knownToProtagonist === false ? '<span style="color:#dc2626"> [主角不知]</span>' : '';
+      const link   = s.linkTo ? `<span style="color:#7c6af7"> → ${esc(s.linkTo)}</span>` : '';
+      return `<div style="margin-bottom:4px;padding-left:6px;border-left:2px solid ${colorMap[s.status]||'#94a3b8'};word-break:break-word">
+        <div style="font-size:9px;color:var(--text-muted);line-height:1.3">${esc(range)}</div>
+        <div style="font-size:11px;line-height:1.4">${stZh}${form}${note}${know}${link}</div>
+      </div>`;
+    }).join('');
+    const range = `${this._chapterIdToZh(ch.firstAppear)} ～ ${this._chapterIdToZh(ch.lastAppear)}`;
+    return `
+      <div style="margin-top:8px;padding-top:6px;border-top:1px dashed var(--border);overflow:hidden">
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;word-break:break-word">⏱ 生死轨迹 · ${esc(range)}</div>
+        <div style="display:flex;gap:1px;border-radius:3px;overflow:hidden;margin-bottom:6px">${segs}</div>
+        <div>${stories}</div>
+      </div>`;
+  },
+
   _renderMaterialsView(container) {
     container.innerHTML = this._toolNav('materials') + `
       <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -1142,12 +1478,102 @@ const App = {
     document.getElementById('ollamaModel').value = Store.getOllamaModel();
   },
 
+  // 自动构建 AI 系统提示词：注入当前章节的 aiContext + 主角已知 fact + 章节大纲，防止AI剧透
+  _buildAIContextPrompt() {
+    const lines = [];
+    const ch = DB.chapters.find(c => c.id === this._currentChapterId);
+    if (!ch) return '';
+    // 章节身份
+    const idx = DB.chapters.findIndex(c => c.id === ch.id);
+    lines.push(`# 当前正在创作 · 第${idx+1}章《${ch.title}》`);
+    if (ch.summary) lines.push(`## 章节摘要\n${ch.summary}`);
+    if (ch.outline) lines.push(`## 章节大纲\n${ch.outline}`);
+    // 章节自带的 aiContext（如果有）
+    if (ch.aiContext) {
+      if (typeof ch.aiContext === 'string') lines.push(`## 章节AI约束\n${ch.aiContext}`);
+      else lines.push(`## 章节AI约束\n${JSON.stringify(ch.aiContext, null, 2)}`);
+    }
+    // 主角视角 - 此章可知的 fact
+    const protagonist = DB.characters.find(c => /主角|protagonist/i.test(c.title || c.role || ''));
+    const known = [], unknown = [];
+    (DB.facts || []).forEach(f => {
+      if (!f.knownBy) return;
+      const kb = (Array.isArray(f.knownBy) ? f.knownBy : [f.knownBy]).find(k => protagonist && k.who === protagonist.id);
+      if (!kb) { unknown.push(f); return; }
+      // kb.from 是"何时起知晓"
+      const fromIdx = kb.from === 'BACKSTORY' ? -1 : (kb.from === 'NEVER' ? 999 : DB.chapters.findIndex(c => c.id === kb.from));
+      if (fromIdx === -1 || (fromIdx >= 0 && fromIdx <= idx)) known.push(f);
+      else unknown.push(f);
+    });
+    if (known.length) lines.push(`## 主角到此章已知的事实\n${known.map(f => '- '+(f.text||f.summary||f.id)).join('\n')}`);
+    if (unknown.length) lines.push(`## ⚠ 主角尚不知情（严禁让主角说出/暗示）\n${unknown.map(f => '- '+(f.text||f.summary||f.id)).join('\n')}`);
+    // 此章涉及的人物当前状态
+    const involvedNames = (ch.characters || '').split(/[，,、]/).map(s => s.trim()).filter(Boolean);
+    if (involvedNames.length) {
+      const charLines = [];
+      involvedNames.forEach(name => {
+        const cc = DB.characters.find(c => c.name === name);
+        if (!cc) return;
+        // 取此章对应的 statusTimeline 段
+        const tl = Array.isArray(cc.statusTimeline) ? cc.statusTimeline : [];
+        let curStatus = cc.currentStatus || cc.status || '?';
+        let curNote = '';
+        for (const seg of tl) {
+          const fIdx = seg.from === 'BACKSTORY' ? -1 : DB.chapters.findIndex(c => c.id === seg.from);
+          const tIdx = seg.to === 'END' ? 999 : DB.chapters.findIndex(c => c.id === seg.to);
+          if ((fIdx === -1 || fIdx <= idx) && (tIdx === 999 || tIdx >= idx)) {
+            curStatus = this._statusZh(seg.status).replace(/^[🟢🟠⚫🟣🔴🟡⚪❔]/, '').trim();
+            curNote = seg.note || '';
+            break;
+          }
+        }
+        charLines.push(`- ${name}（${cc.title||''}）：${curStatus}${curNote?'·'+curNote:''}`);
+      });
+      if (charLines.length) lines.push(`## 此章涉及人物的当下状态\n${charLines.join('\n')}`);
+    }
+    if (!lines.length) return '';
+    return `[小说创作约束 · 严格遵守]\n${lines.join('\n\n')}\n\n---\n\n`;
+  },
+
+  // 预览即将注入给 AI 的完整 system prompt，弹窗展示便于调试
+  _previewAIContext() {
+    const ctx = this._buildAIContextPrompt();
+    if (!ctx) { this._toast('当前章节没有可注入的上下文（请先选章节、维护人物/事实）'); return; }
+    // 复用 modal-overlay 简单实现
+    let dlg = document.getElementById('modal-ai-preview');
+    if (!dlg) {
+      dlg = document.createElement('div');
+      dlg.className = 'modal-overlay';
+      dlg.id = 'modal-ai-preview';
+      dlg.innerHTML = `<div class="modal-box modal-lg">
+        <div class="modal-header"><span>👁 即将注入给 AI 的上下文</span><button class="btn btn-sm" id="aiPrevClose">✕</button></div>
+        <div class="modal-body"><textarea id="aiPrevText" rows="22" style="width:100%;font-family:Consolas,monospace;font-size:12px;line-height:1.5"></textarea>
+          <div style="margin-top:8px;font-size:11px;color:#64748b">每次发送给 AI 时，这段约束会自动加在最前面，AI 不会知道主角不知的事。</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="aiPrevCopy">📋 复制</button>
+          <button class="btn btn-primary" id="aiPrevOk">关闭</button>
+        </div></div>`;
+      document.body.appendChild(dlg);
+      dlg.querySelector('#aiPrevClose').onclick = () => dlg.classList.remove('show');
+      dlg.querySelector('#aiPrevOk').onclick = () => dlg.classList.remove('show');
+      dlg.querySelector('#aiPrevCopy').onclick = () => {
+        const ta = dlg.querySelector('#aiPrevText');
+        ta.select(); document.execCommand('copy');
+        this._toast('已复制 ✓');
+      };
+    }
+    dlg.querySelector('#aiPrevText').value = ctx;
+    dlg.classList.add('show');
+  },
+
   _aiPreset(preset) {
     const editor = document.getElementById('editor');
     const start = editor.selectionStart, end = editor.selectionEnd;
     const context = start !== end ? editor.value.substring(start, end) : editor.value.substring(0, Math.min(editor.value.length, 500));
     if (!context.trim()) { this._toast('请先写一些内容'); return; }
-    this._sendAI(`【${preset.label}】\n${context}`, preset.prompt + '\n\n' + context);
+    const sysCtx = this._buildAIContextPrompt();
+    this._sendAI(`【${preset.label}】\n${context}`, sysCtx + preset.prompt + '\n\n' + context);
   },
 
   _sendAIMessage() {
@@ -1157,7 +1583,8 @@ const App = {
     const editor = document.getElementById('editor');
     const start = editor.selectionStart, end = editor.selectionEnd;
     const context = start !== end ? editor.value.substring(start, end) : editor.value.substring(0, Math.min(editor.value.length, 800));
-    const fullPrompt = context ? `【上下文】\n${context}\n\n【指令】\n${userText}` : userText;
+    const sysCtx = this._buildAIContextPrompt();
+    const fullPrompt = sysCtx + (context ? `【正文上下文】\n${context}\n\n【指令】\n${userText}` : userText);
     input.value = '';
     this._sendAI(userText, fullPrompt);
   },
@@ -1323,18 +1750,114 @@ const App = {
       if (!ch) return;
       document.getElementById('char-name').value = ch.name || '';
       document.getElementById('char-title').value = ch.title || '';
-      document.getElementById('char-status').value = ch.status || 'alive';
+      document.getElementById('char-status').value = ch.currentStatus || ch.status || 'alive';
+      document.getElementById('char-first-appear').value = ch.firstAppear || '';
+      document.getElementById('char-last-appear').value = ch.lastAppear || '';
+      document.getElementById('char-status-timeline').value = this._statusTimelineToText(ch.statusTimeline);
       const tags = Array.isArray(ch.tags) ? ch.tags : (ch.tags||'').split(/[，,]/).filter(Boolean);
       document.getElementById('char-tags').value = tags.join('，');
       document.getElementById('char-summary').value = ch.summary || '';
       const details = typeof ch.details === 'object' ? ch.details : {};
       document.getElementById('char-details').value = Object.entries(details).map(([k,v]) => `${k}：${Array.isArray(v)?v.join('；'):v}`).join('\n');
     } else {
-      ['char-name','char-title','char-tags','char-summary','char-details'].forEach(f => document.getElementById(f).value = '');
+      ['char-name','char-title','char-tags','char-summary','char-details','char-first-appear','char-last-appear','char-status-timeline'].forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
       document.getElementById('char-status').value = 'alive';
+    }
+    // 章节插入助手
+    const helper = document.getElementById('char-tl-helper');
+    if (helper && !helper._bound) {
+      helper._bound = true;
+      helper.addEventListener('click', () => this._insertChapterMarker());
     }
     this._openModal('modal-char');
     setTimeout(() => document.getElementById('char-name').focus(), 100);
+  },
+
+  // 把 statusTimeline 数组序列化为多行可读文本
+  _statusTimelineToText(tl) {
+    if (!Array.isArray(tl) || !tl.length) return '';
+    return tl.map(s => {
+      const from = s.from || '?', to = s.to || '?';
+      const status = s.status || 'unknown';
+      const form = s.form ? `(${s.form})` : '';
+      const note = s.note ? ' · ' + s.note : '';
+      const know = s.knownToProtagonist === false ? '  [主角不知]' : '';
+      const link = s.linkTo ? `  [→${s.linkTo}]` : '';
+      return `${from} → ${to} : ${status}${form}${note}${know}${link}`;
+    }).join('\n');
+  },
+
+  // 把多行文本解析回 statusTimeline 数组（容错：支持中英文写法）
+  _parseStatusTimeline(text) {
+    if (!text || !text.trim()) return [];
+    const STATUS_WORDS = ['alive','dying','dead','soul','spirit','reincarnated','not_yet_born','unknown'];
+    const ZH_MAP = { '存活':'alive','活':'alive','垂死':'dying','重伤':'dying','已故':'dead','死':'dead','死亡':'dead','残魂':'soul','魂':'soul','妖鬼':'spirit','妖':'spirit','鬼':'spirit','已转世':'reincarnated','转世':'reincarnated','投胎':'reincarnated','未出生':'not_yet_born','未生':'not_yet_born','下落不明':'unknown','失踪':'unknown' };
+    const out = [];
+    text.split('\n').forEach(raw => {
+      const line = raw.trim();
+      if (!line || line.startsWith('#') || line.startsWith('//')) return;
+      // 形式1（首选）：from → to : status(form) · note  [主角不知]  [→link]
+      let m = line.match(/^(.+?)\s*[→\-]+>?\s*(.+?)\s*[:：]\s*(.+)$/);
+      if (m) {
+        const from = m[1].trim(), to = m[2].trim();
+        let rest = m[3].trim();
+        const seg = { from, to };
+        if (/\[主角不知\]/.test(rest)) { seg.knownToProtagonist = false; rest = rest.replace(/\[主角不知\]/g,'').trim(); }
+        const linkM = rest.match(/\[→\s*([^\]]+)\]/);
+        if (linkM) { seg.linkTo = linkM[1].trim(); rest = rest.replace(linkM[0],'').trim(); }
+        // status(form) · note
+        const sm = rest.match(/^([A-Za-z_]+|[\u4e00-\u9fa5]+)\s*(?:\(([^)]+)\))?\s*(?:[·\-]\s*(.+))?$/);
+        if (sm) {
+          let st = sm[1];
+          if (!STATUS_WORDS.includes(st)) st = ZH_MAP[st] || 'unknown';
+          seg.status = st;
+          if (sm[2]) seg.form = sm[2].trim();
+          if (sm[3]) seg.note = sm[3].trim();
+        } else {
+          seg.status = 'unknown';
+          seg.note = rest;
+        }
+        out.push(seg);
+        return;
+      }
+      // 形式2（中文松散）：阶段名：状态·描述
+      m = line.match(/^(.+?)[:：](.+)$/);
+      if (m) {
+        const phase = m[1].trim();
+        const rest = m[2].trim();
+        const sm = rest.match(/^([\u4e00-\u9fa5A-Za-z_]+)\s*(?:[·\-]\s*(.+))?$/);
+        const seg = { from: phase, to: phase };
+        if (sm) {
+          let st = sm[1];
+          if (!STATUS_WORDS.includes(st)) st = ZH_MAP[st] || 'unknown';
+          seg.status = st;
+          if (sm[2]) seg.note = sm[2].trim();
+        } else {
+          seg.status = 'unknown';
+          seg.note = rest;
+        }
+        out.push(seg);
+      }
+    });
+    return out;
+  },
+
+  // 章节标记插入助手：弹出选择器，把 ch_xxx 插入到光标处
+  _insertChapterMarker() {
+    if (!DB.chapters.length) { this._toast('暂无章节可插入'); return; }
+    const lines = ['BACKSTORY  （故事开始前）','END  （直到完结）','---  请选择章节  ---'];
+    DB.chapters.forEach((c,i) => lines.push(`${c.id}  （第${i+1}章 · ${c.title}）`));
+    const idx = prompt('选择要插入的章节标记（输入序号）：\n\n' + lines.map((l,i) => `${i+1}. ${l}`).join('\n'), '');
+    if (!idx) return;
+    const n = parseInt(idx, 10);
+    if (isNaN(n) || n < 1 || n > lines.length) return;
+    const picked = lines[n-1].split(/\s+/)[0];
+    if (picked === '---') return;
+    const ta = document.getElementById('char-status-timeline');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.slice(0,start) + picked + ta.value.slice(end);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = start + picked.length;
   },
 
   _saveChar() {
@@ -1349,9 +1872,20 @@ const App = {
         else { const idx2 = line.indexOf(':'); if (idx2 > 0) details[line.slice(0,idx2).trim()] = line.slice(idx2+1).trim(); }
       });
     }
+    // 解析生死轨迹
+    const tlText = document.getElementById('char-status-timeline').value;
+    const statusTimeline = this._parseStatusTimeline(tlText);
+    const quickStatus = document.getElementById('char-status').value;
+    // currentStatus 优先取轨迹最后一段，回退到下拉框
+    const currentStatus = (statusTimeline.length ? statusTimeline[statusTimeline.length-1].status : quickStatus) || 'alive';
+
     const cd = {
       name, title:document.getElementById('char-title').value.trim(),
-      status:document.getElementById('char-status').value,
+      status: quickStatus,                         // 兼容旧字段
+      currentStatus,                               // 推导出的当下/最终态
+      firstAppear: document.getElementById('char-first-appear').value.trim(),
+      lastAppear:  document.getElementById('char-last-appear').value.trim(),
+      statusTimeline,
       tags:document.getElementById('char-tags').value.split(/[，,]/).map(t=>t.trim()).filter(Boolean),
       summary:document.getElementById('char-summary').value.trim(),
       details,
@@ -1683,6 +2217,8 @@ const App = {
     document.getElementById('btnAiStop').addEventListener('click', () => this._aiAbortCtrl?.abort());
     document.getElementById('btnAiClear').addEventListener('click', () => { Store.clearAIHistory(); this._renderAIChat(); });
     document.getElementById('btnAiInsert').addEventListener('click', () => this._insertAIText());
+    const btnPrev2 = document.getElementById('btnAiPreview');
+    if (btnPrev2) btnPrev2.addEventListener('click', () => this._previewAIContext());
     document.getElementById('ollamaUrl').addEventListener('change', e => Store.setOllamaUrl(e.target.value));
     document.getElementById('ollamaModel').addEventListener('change', e => Store.setOllamaModel(e.target.value));
 

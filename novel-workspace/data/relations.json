@@ -1,65 +1,117 @@
 [
   {
     "id": "rel_1",
-    "charA": "lgrz",
-    "charB": "xuanyi",
-    "type": "师徒",
-    "desc": "玄义因发现李归舟能见鬼而留其为帮手。教剑术、道法、侠义之道。案一中饿妖战牺牲，临终把「苍生太平」剑塞入主角手中。衣钵传承。"
+    "from": "char_xuanyi",
+    "to": "char_ligz",
+    "label": "师徒",
+    "type": "师承",
+    "direction": "directed",
+    "validFrom": "ch_an1_2",
+    "validTo": "ch_an1_7",
+    "evolution": [
+      { "at": "ch_an1_1", "stage": "陌生人→施粥" },
+      { "at": "ch_an1_2", "stage": "正式收为帮手" },
+      { "at": "ch_an1_3", "stage": "亦师亦友" },
+      { "at": "ch_an1_7", "stage": "传衣钵后牺牲" }
+    ],
+    "desc": "玄义因发现李归舟能见鬼而留其为帮手。教剑术、道法、侠义。案一中牺牲，衣钵传承。"
   },
   {
     "id": "rel_2",
-    "charA": "xuanyi",
-    "charB": "chongwei",
-    "type": "师徒",
-    "desc": "冲微是玄义的师父，道号冲微，死在一条蛟嘴里。只在玄义的回忆中出现。师承链：冲微→玄义→李归舟。"
+    "from": "char_chongwei",
+    "to": "char_xuanyi",
+    "label": "师徒",
+    "type": "师承",
+    "direction": "directed",
+    "validFrom": "BACKSTORY",
+    "validTo": "BACKSTORY",
+    "desc": "冲微是玄义的师父，死在蛟嘴里。师承链：冲微→玄义→李归舟。"
   },
   {
     "id": "rel_3",
-    "charA": "lgrz",
-    "charB": "zhaoky",
-    "type": "深层关联（待揭示）",
-    "desc": "主角与赵匡胤前世之间存在某种深刻关联。主角需用玉佩收拢其残魂、助其投胎。每消灭一个妖鬼→收拢一缕残魂→刻痕亮一道→残魂逐渐完整→960年投胎为赵匡胤。"
+    "from": "char_ligz",
+    "to": "char_lingshi",
+    "label": "同道→好友→残魂寄宿者",
+    "type": "羁绊",
+    "direction": "undirected",
+    "validFrom": "案?_登场",
+    "validTo": "ch_final",
+    "evolution": [
+      { "at": "案?_登场", "stage": "偶遇互相试探" },
+      { "at": "案?_合作", "stage": "临时合作" },
+      { "at": "案?_默契", "stage": "并肩生死，好友" },
+      { "at": "案?_战死", "stage": "主角以为令使死了（真相被隐藏）", "spoilerWarn": true },
+      { "at": "案?_苏醒", "stage": "玉佩中沟通，残魂同行" },
+      { "at": "ch_final", "stage": "投胎为赵匡胤，永别" }
+    ],
+    "desc": "路数不同（道术+剑 vs 幽冥令+长刀）。从陌生→合作→生死之交→以为永别→玉佩重逢→真正永别。"
   },
   {
     "id": "rel_4",
-    "charA": "lgrz",
-    "charB": "zhaodutou",
-    "type": "对手",
-    "desc": "案一最终战。李归舟用玄义教的法子（道火+灯油圈）烧杀七个饿妖。赵都头曾是左神策军禁军，灰烬中留下不坏的铜牌——「左神策军第十营 赵二郎」。"
+    "from": "char_lingshi",
+    "to": "char_zhaoky",
+    "label": "转世",
+    "type": "形而上",
+    "direction": "directed",
+    "validFrom": "ch_final",
+    "validTo": "END",
+    "meta": { "isMetaphysical": true, "spoilerLevel": "终章", "knownByReader": "ch_final" },
+    "desc": "令使残魂在玉佩中养足后投胎为赵匡胤。整本书最大的暗线。"
   },
   {
     "id": "rel_5",
-    "charA": "lgrz",
-    "charB": "laojiao",
-    "type": "理解/共鸣",
-    "desc": "案三核心关系。老蛟是被遗忘的水神守护者，李归舟是被时代抛掷的异乡人。主角不斩蛟而帮它恢复神位——这一刻真正理解了「守护」的含义。"
+    "from": "char_lingshi",
+    "to": "item_yupei",
+    "label": "残魂寄居",
+    "type": "魂物",
+    "direction": "directed",
+    "validFrom": "案?_战死",
+    "validTo": "ch_final",
+    "desc": "令使战死后残魂被玉佩吸收，玉佩养魂之效令其慢慢恢复意识。"
   },
   {
     "id": "rel_6",
-    "charA": "lgrz",
-    "charB": "shoubei",
-    "type": "共鸣/使命",
-    "desc": "案五核心关系。守碑老人二十年等一句话「你的任务完成了」，主角陪他点一夜火后说出。这一刻主角完成了从被动到主动的侠义转变。"
+    "from": "char_ligz",
+    "to": "item_yupei",
+    "label": "持有者/守玉人",
+    "type": "持有",
+    "direction": "directed",
+    "validFrom": "ch_an1_1",
+    "validTo": "END",
+    "desc": "穿越落地时玉佩在水杯旁凭空出现。本质是当代守玉人。"
   },
   {
     "id": "rel_7",
-    "charA": "yupai",
-    "charB": "zhaoky",
-    "type": "承载",
-    "desc": "玉佩是唯一能承载赵匡胤前世残魂的物品。主角通过玉佩收拢散落的残魂，刻痕随残魂归聚逐道亮起。玉佩不是囚笼，是残魂的容器。"
+    "from": "char_ligz",
+    "to": "item_jian",
+    "label": "持有者",
+    "type": "持有",
+    "direction": "directed",
+    "validFrom": "ch_an1_5",
+    "validTo": "END",
+    "desc": "玄义临终把剑塞进主角手里——苍生太平剑。"
   },
   {
     "id": "rel_8",
-    "charA": "lgrz",
-    "charB": "yupai",
-    "type": "绑定",
-    "desc": "玉佩选中主角。首次穿越时凭空出现在水杯旁。既是穿越的工具、解锁能力的钥匙、也是收拢残魂的唯一容器。从不解释自己。是工具也是使命。"
+    "from": "char_ligz",
+    "to": "char_zhaodutou",
+    "label": "斩杀",
+    "type": "对抗",
+    "direction": "directed",
+    "validFrom": "ch_an1_6",
+    "validTo": "ch_an1_6",
+    "desc": "案一最终战。李归舟用玄义老道教的法子（道火+灯油圈）烧杀七个饿妖。"
   },
   {
     "id": "rel_9",
-    "charA": "lgrz",
-    "charB": "chongwei",
-    "type": "师承（间接）",
-    "desc": "冲微→玄义→李归舟。三代师承链。冲微一生除妖济世死于蛟嘴，玄义继承其道死于饿妖，李归舟继承其剑走上自己的路。"
+    "from": "char_chongwei",
+    "to": "char_laojiao",
+    "label": "死于蛟嘴",
+    "type": "对抗",
+    "direction": "directed",
+    "validFrom": "BACKSTORY",
+    "validTo": "BACKSTORY",
+    "desc": "冲微死于蛟嘴——但是不是这条钱塘老蛟？伏笔。",
+    "meta": { "uncertain": true }
   }
 ]

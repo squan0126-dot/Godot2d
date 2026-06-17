@@ -1,0 +1,137 @@
+{
+  "_meta": {
+    "purpose": "三视角信息差地图：避免AI写作时让角色提前知道作者已知的事，导致剧透/穿帮。",
+    "viewpoints": {
+      "reader": "读者：从开篇第一章逐章获取信息。剧透红线。",
+      "protagonist": "主角李归舟：他在某一时刻的认知。最容易被AI写错。",
+      "lingshi": "令使：他自己作为残魂的认知历程。",
+      "author": "作者全知视角，作为基准答案，永远=true。"
+    },
+    "from_format": "可填章节id（如ch_an1_1）/ 案件标记（案Y）/ NEVER（永不知晓）/ END（直到完结都不知）",
+    "usage": "AI写章节X时，先查询此表：'在章节X时刻，protagonist 不知道哪些 fact'，把这些事实从内心戏/对白中剔除。"
+  },
+  "facts": [
+    {
+      "id": "fact_zky_is_lingshi",
+      "fact": "赵匡胤是令使的转世",
+      "spoilerLevel": "终极",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "ch_final" },
+        "protagonist": { "from": "ch_final" },
+        "lingshi":     { "from": "NEVER" }
+      },
+      "warning": "AI写任何中前期章节时，绝对不能让任何角色（包括令使本人）提及或暗示这件事。"
+    },
+    {
+      "id": "fact_lingshi_in_jade",
+      "fact": "令使残魂困于玉佩中",
+      "spoilerLevel": "中段反转",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "案?_苏醒" },
+        "protagonist": { "from": "案?_苏醒" },
+        "lingshi":     { "from": "案?_苏醒", "note": "苏醒前他自己也不知道" }
+      },
+      "warning": "令使战死案~苏醒案之间，主角必须以为他真死了。这段悲痛是反转的力量来源，不能写穿。"
+    },
+    {
+      "id": "fact_yupei_origin",
+      "fact": "玉佩是唐代高人以陨铁与魂魄石所铸，共七枚，有养魂之效",
+      "spoilerLevel": "中后期",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "案16+", "note": "逐步揭示" },
+        "protagonist": { "from": "案16+", "note": "逐步揭示" }
+      }
+    },
+    {
+      "id": "fact_other_yupei_exist",
+      "fact": "玉佩不止一枚，还有六枚在世",
+      "spoilerLevel": "世界观扩展",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "案11_15" },
+        "protagonist": { "from": "案11_15" }
+      },
+      "hints": [
+        { "atChapter": "案6_10", "type": "穿越间隙", "content": "见到其他戴过玉佩的人，主角隐约觉得熟悉但说不上来" }
+      ]
+    },
+    {
+      "id": "fact_protagonist_jianxiu",
+      "fact": "李归舟的剑术本质是剑修入门",
+      "spoilerLevel": "中后期彩蛋",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "中后期某案_被高人点破" },
+        "protagonist": { "from": "中后期某案_被高人点破" },
+        "char_xuanyi": { "from": "ch_an1_1", "note": "玄义可能知道但没明说" }
+      }
+    },
+    {
+      "id": "fact_time_loop",
+      "fact": "时间悖论闭环：没有主角在古代斩妖→赵匡胤投胎→大宋存在",
+      "spoilerLevel": "终极反转",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "ch_final" },
+        "protagonist": { "from": "ch_final" }
+      }
+    },
+    {
+      "id": "fact_prophecy",
+      "fact": "预知妖说过'此人命格极重，下一世当有王者之气'",
+      "spoilerLevel": "伏笔",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "案?_预言事件" },
+        "protagonist": { "from": "案?_预言事件", "note": "听过但没当真，结局回想起来" },
+        "lingshi":     { "from": "案?_预言事件", "note": "嗤之以鼻" }
+      }
+    },
+    {
+      "id": "fact_xuanyi_will_die",
+      "fact": "玄义老道会在案一最终战中牺牲",
+      "spoilerLevel": "无（作者层）",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "ch_an1_5" },
+        "protagonist": { "from": "ch_an1_5" },
+        "char_xuanyi": { "from": "ch_an1_5", "note": "动手前一刻才知道这是绝战" }
+      },
+      "warning": "ch_an1_1~ch_an1_4 期间，玄义和主角的对白要保持'明天还有明天'的日常感，禁止写出任何死亡预兆式的告别。"
+    },
+    {
+      "id": "fact_zhaodutou_origin",
+      "fact": "饿妖是黄巢溃兵赵都头所化，铜牌：左神策军第十营 赵二郎",
+      "spoilerLevel": "案一谜底",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "ch_an1_4" },
+        "protagonist": { "from": "ch_an1_4", "note": "瘸腿老兵告知" }
+      }
+    },
+    {
+      "id": "fact_laojiao_is_waterGod",
+      "fact": "老蛟是六百年水神，不是想伤人是想被记起",
+      "spoilerLevel": "案三反转",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "ch_an3_1_深入" },
+        "protagonist": { "from": "ch_an3_1_深入" }
+      }
+    },
+    {
+      "id": "fact_yupei_has_consciousness",
+      "fact": "玉佩里有意识（即令使残魂）",
+      "spoilerLevel": "渐进感知",
+      "knownBy": {
+        "author":      { "from": "ALWAYS" },
+        "reader":      { "from": "ch_an3_1", "note": "首次隐约感知" },
+        "protagonist": { "from": "ch_an3_1", "note": "只是直觉，不知道是谁" }
+      },
+      "warning": "案三只是首次'感知'，案三时主角还不知道这是令使（令使尚未登场或尚未战死）。"
+    }
+  ]
+}
