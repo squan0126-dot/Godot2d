@@ -9,10 +9,22 @@
     "validFrom": "ch_an1_2",
     "validTo": "ch_an1_7",
     "evolution": [
-      { "at": "ch_an1_1", "stage": "陌生人→施粥" },
-      { "at": "ch_an1_2", "stage": "正式收为帮手" },
-      { "at": "ch_an1_3", "stage": "亦师亦友" },
-      { "at": "ch_an1_7", "stage": "传衣钵后牺牲" }
+      {
+        "at": "ch_an1_1",
+        "stage": "陌生人→施粥"
+      },
+      {
+        "at": "ch_an1_2",
+        "stage": "正式收为帮手"
+      },
+      {
+        "at": "ch_an1_3",
+        "stage": "亦师亦友"
+      },
+      {
+        "at": "ch_an1_7",
+        "stage": "传衣钵后牺牲"
+      }
     ],
     "desc": "玄义因发现李归舟能见鬼而留其为帮手。教剑术、道法、侠义。案一中牺牲，衣钵传承。"
   },
@@ -37,12 +49,31 @@
     "validFrom": "案?_登场",
     "validTo": "ch_final",
     "evolution": [
-      { "at": "案?_登场", "stage": "偶遇互相试探" },
-      { "at": "案?_合作", "stage": "临时合作" },
-      { "at": "案?_默契", "stage": "并肩生死，好友" },
-      { "at": "案?_战死", "stage": "主角以为令使死了（真相被隐藏）", "spoilerWarn": true },
-      { "at": "案?_苏醒", "stage": "玉佩中沟通，残魂同行" },
-      { "at": "ch_final", "stage": "投胎为赵匡胤，永别" }
+      {
+        "at": "案?_登场",
+        "stage": "偶遇互相试探"
+      },
+      {
+        "at": "案?_合作",
+        "stage": "临时合作"
+      },
+      {
+        "at": "案?_默契",
+        "stage": "并肩生死，好友"
+      },
+      {
+        "at": "案?_战死",
+        "stage": "主角以为令使死了（真相被隐藏）",
+        "spoilerWarn": true
+      },
+      {
+        "at": "案?_苏醒",
+        "stage": "玉佩中沟通，残魂同行"
+      },
+      {
+        "at": "ch_final",
+        "stage": "投胎为赵匡胤，永别"
+      }
     ],
     "desc": "路数不同（道术+剑 vs 幽冥令+长刀）。从陌生→合作→生死之交→以为永别→玉佩重逢→真正永别。"
   },
@@ -55,7 +86,11 @@
     "direction": "directed",
     "validFrom": "ch_final",
     "validTo": "END",
-    "meta": { "isMetaphysical": true, "spoilerLevel": "终章", "knownByReader": "ch_final" },
+    "meta": {
+      "isMetaphysical": true,
+      "spoilerLevel": "终章",
+      "knownByReader": "ch_final"
+    },
     "desc": "令使残魂在玉佩中养足后投胎为赵匡胤。整本书最大的暗线。"
   },
   {
@@ -112,6 +147,8 @@
     "validFrom": "BACKSTORY",
     "validTo": "BACKSTORY",
     "desc": "冲微死于蛟嘴——但是不是这条钱塘老蛟？伏笔。",
-    "meta": { "uncertain": true }
+    "meta": {
+      "uncertain": true
+    }
   }
 ]

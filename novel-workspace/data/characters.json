@@ -8,7 +8,13 @@
     "firstAppear": "ch_an1_1",
     "lastAppear": "END",
     "statusTimeline": [
-      { "from": "ch_an1_1", "to": "END", "status": "alive", "form": "human", "note": "全程主角，未死" }
+      {
+        "from": "ch_an1_1",
+        "to": "END",
+        "status": "alive",
+        "form": "human",
+        "note": "全程主角，未死"
+      }
     ],
     "desc": "28岁普通上班族（会计），穿越到唐末乱世。骨子里有侠气但从未被激活，理性有底线，看到不公会难受但憋在心里。穿越后跟随玄义老道学艺，案1-5师徒同行五案，案6玄义被画皮妖所杀后继承道袍、剑（苍生太平）、瘦马，以道士身份独行乱世。心里压着两件事：师父的剑、画皮妖未死。",
     "color": "#7c6af7",
@@ -24,9 +30,27 @@
     "firstAppear": "ch_an1_1",
     "lastAppear": "ch_an6_X",
     "statusTimeline": [
-      { "from": "ch_an1_1", "to": "ch_an6_decisive", "status": "alive", "form": "human", "note": "陪主角走过案1-5，案6中段独自迎战大妖" },
-      { "from": "ch_an6_decisive", "to": "ch_an6_end", "status": "dying", "form": "human", "note": "力竭重伤、嘴角带血还在嘲妖" },
-      { "from": "ch_an6_end", "to": "END", "status": "dead", "form": "buried", "note": "骨头无存或仅剩半截剑，主角埋衣冠冢，剑尖刻名" }
+      {
+        "from": "ch_an1_1",
+        "to": "ch_an6_decisive",
+        "status": "alive",
+        "form": "human",
+        "note": "陪主角走过案1-5，案6中段独自迎战大妖"
+      },
+      {
+        "from": "ch_an6_decisive",
+        "to": "ch_an6_end",
+        "status": "dying",
+        "form": "human",
+        "note": "力竭重伤、嘴角带血还在嘲妖"
+      },
+      {
+        "from": "ch_an6_end",
+        "to": "END",
+        "status": "dead",
+        "form": "buried",
+        "note": "骨头无存或仅剩半截剑，主角埋衣冠冢，剑尖刻名"
+      }
     ],
     "desc": "五十来岁的云游道士，灰白头发束在脑后，青布道袍洗得发白但收拾得整齐（不打补丁——他怕邋遢），牵一匹瘦马。无门无派，因发现李归舟能见鬼而留其为帮手。教剑术、道法、侠义之道。陪主角走过案1-5，案6中力战赴死。\n\n人设内核（玄霄式真侠客 90% + 烟火气 10%）：\n— 真侠客：明知不可为而为之，看到不平事就管，从不计算得失\n— 举重若轻：再凶险的局也带三分玩笑，越紧张话越闲\n— 烟火气调味：嫌赶路冷、爱喝两口、嘴上嫌主角笨手笨脚但每次出事都挡在前头\n— 不端着：不讲'天命所归''道法玄妙'那套，开口都是'走了走了''吃了再说''你这剑握得跟拿筷子似的'",
     "color": "#60a5fa",
@@ -42,8 +66,21 @@
     "firstAppear": "ch_final",
     "lastAppear": "ch_final",
     "statusTimeline": [
-      { "from": "ch_an1_1", "to": "ch_final", "status": "not_yet_born", "form": "未出生", "note": "本人在故事中从未直接出场，是令使转世" },
-      { "from": "ch_final", "to": "END", "status": "alive", "form": "human", "note": "令使残魂投胎而成", "linkFrom": "char_lingshi" }
+      {
+        "from": "ch_an1_1",
+        "to": "ch_final",
+        "status": "not_yet_born",
+        "form": "未出生",
+        "note": "本人在故事中从未直接出场，是令使转世"
+      },
+      {
+        "from": "ch_final",
+        "to": "END",
+        "status": "alive",
+        "form": "human",
+        "note": "令使残魂投胎而成",
+        "linkFrom": "char_lingshi"
+      }
     ],
     "desc": "令使残魂在玉佩中养足、最终投胎后的转世之人。他本人在故事中从未直接出场——他的存在是整条暗线的终点，是主角在故事结局才会意识到的事。统一乱世、建立大宋，是历史已经写好的结局。",
     "color": "#fbbf24",
@@ -59,7 +96,13 @@
     "firstAppear": "BACKSTORY",
     "lastAppear": "BACKSTORY",
     "statusTimeline": [
-      { "from": "BACKSTORY", "to": "BACKSTORY", "status": "dead", "form": "已故", "note": "故事开始前已死于蛟嘴，仅在玄义回忆中出现" }
+      {
+        "from": "BACKSTORY",
+        "to": "BACKSTORY",
+        "status": "dead",
+        "form": "已故",
+        "note": "故事开始前已死于蛟嘴，仅在玄义回忆中出现"
+      }
     ],
     "desc": "玄义老道的师父，道号冲微，死在一条蛟嘴里。只在玄义的回忆中出现。",
     "color": "#94a3b8",
@@ -75,13 +118,58 @@
     "firstAppear": "ch_an6_X",
     "lastAppear": "ch_an32_X",
     "statusTimeline": [
-      { "from": "BACKSTORY", "to": "ch_an6_X", "status": "alive", "form": "披皮·某寺住持/某地县令", "note": "已惯犯多年，每过段时间换一张高位脸，吃饱了就走" },
-      { "from": "ch_an6_X", "to": "ch_an6_X_revenge", "status": "alive", "form": "披皮决战", "note": "杀玄义" },
-      { "from": "ch_an6_X_revenge", "to": "ch_an14_X", "status": "alive_thought_dead", "form": "匿迹·暗中行动", "note": "主角以为已斩之，实则砍下的只是它当时戴的脸", "knownToProtagonist": false },
-      { "from": "ch_an14_X", "to": "ch_an22_X", "status": "alive", "form": "披皮升级·节度使师爷或国师", "note": "中盘主角隐约察觉，但无证据按下不表", "knownToProtagonist": "suspect" },
-      { "from": "ch_an22_X", "to": "ch_an31_X", "status": "alive", "form": "披皮高位·京城/朝堂级", "note": "真相揭穿，主角崩溃但暂时无法斩之，宿敌确立", "knownToProtagonist": true },
-      { "from": "ch_an31_X", "to": "ch_an32_X", "status": "dying", "form": "全部伪装剥落·真身", "note": "主角终极猎杀" },
-      { "from": "ch_an32_X", "to": "END", "status": "dead", "form": "已斩", "note": "画皮妖终被斩，玉佩第一环完全亮起，主角解锁画皮神通全功能" }
+      {
+        "from": "BACKSTORY",
+        "to": "ch_an6_X",
+        "status": "alive",
+        "form": "披皮·某寺住持/某地县令",
+        "note": "已惯犯多年，每过段时间换一张高位脸，吃饱了就走"
+      },
+      {
+        "from": "ch_an6_X",
+        "to": "ch_an6_X_revenge",
+        "status": "alive",
+        "form": "披皮决战",
+        "note": "杀玄义"
+      },
+      {
+        "from": "ch_an6_X_revenge",
+        "to": "ch_an14_X",
+        "status": "alive_thought_dead",
+        "form": "匿迹·暗中行动",
+        "note": "主角以为已斩之，实则砍下的只是它当时戴的脸",
+        "knownToProtagonist": false
+      },
+      {
+        "from": "ch_an14_X",
+        "to": "ch_an22_X",
+        "status": "alive",
+        "form": "披皮升级·节度使师爷或国师",
+        "note": "中盘主角隐约察觉，但无证据按下不表",
+        "knownToProtagonist": "suspect"
+      },
+      {
+        "from": "ch_an22_X",
+        "to": "ch_an31_X",
+        "status": "alive",
+        "form": "披皮高位·京城/朝堂级",
+        "note": "真相揭穿，主角崩溃但暂时无法斩之，宿敌确立",
+        "knownToProtagonist": true
+      },
+      {
+        "from": "ch_an31_X",
+        "to": "ch_an32_X",
+        "status": "dying",
+        "form": "全部伪装剥落·真身",
+        "note": "主角终极猎杀"
+      },
+      {
+        "from": "ch_an32_X",
+        "to": "END",
+        "status": "dead",
+        "form": "已斩",
+        "note": "画皮妖终被斩，玉佩第一环完全亮起，主角解锁画皮神通全功能"
+      }
     ],
     "desc": "贯穿全书的纯恶妖物，没有自己的固定名号——它扮演谁，民间就叫它谁。【写作纪律：在文档/对话/旁白中以'画皮妖'统一指代，但在故事文本里它出现时永远以它当下伪装的身份示人（住持X、县令Y、节度使师爷Z），读者最初不会知道这些都是同一只妖】。\n\n本质：纯粹的食人捕食者。最初是某种野生兽精，靠埋伏扑杀活人为食；吃了上百人后开智，发现'披人皮'能让食物自己送上门；披皮日久懂人话懂人心，进化为'替换高位者，借神明索贡之名让百姓自愿献祭'——直接吃人会被通缉，扮成住持/县令喊一声'山神要童男童女三人保一方平安'，百姓哭着把孩子送上来还要磕头谢恩，它当面慈悲转头大快朵颐。\n\n画皮形态（D方案·混合·随等级进化）：\n— 平时：本体无脸（像一团带眼孔的肉），不能见人\n— 紧急时：披一张备用皮（手中常备几张近期吃过的人脸）\n— 高级时：能临时画一张陌生脸（吃得越多画得越快越像）\n— 顶级时（终局）：可同时维持多张脸于不同地点（分身式伪装）",
     "color": "#dc2626",
@@ -97,8 +185,20 @@
     "firstAppear": "ch_an3_1",
     "lastAppear": "ch_an3_1",
     "statusTimeline": [
-      { "from": "BACKSTORY", "to": "ch_an3_1", "status": "alive", "form": "蛟", "note": "守钱塘江六百年，香火断两百年" },
-      { "from": "ch_an3_1", "to": "END", "status": "alive", "form": "蛟", "note": "神位恢复，继续守江" }
+      {
+        "from": "BACKSTORY",
+        "to": "ch_an3_1",
+        "status": "alive",
+        "form": "蛟",
+        "note": "守钱塘江六百年，香火断两百年"
+      },
+      {
+        "from": "ch_an3_1",
+        "to": "END",
+        "status": "alive",
+        "form": "蛟",
+        "note": "神位恢复，继续守江"
+      }
     ],
     "desc": "钱塘江水神的坐骑，当了六百年水神。庙里换了财神后香火断了两百年，越来越虚弱暴躁。不是想伤人，是想让人想起它。",
     "color": "#22d3ee",
@@ -114,8 +214,20 @@
     "firstAppear": "ch_an5_1",
     "lastAppear": "ch_an5_1",
     "statusTimeline": [
-      { "from": "BACKSTORY", "to": "ch_an5_1", "status": "alive", "form": "human", "note": "二十年守烽火台" },
-      { "from": "ch_an5_1", "to": "END", "status": "alive", "form": "human", "note": "执念解除" }
+      {
+        "from": "BACKSTORY",
+        "to": "ch_an5_1",
+        "status": "alive",
+        "form": "human",
+        "note": "二十年守烽火台"
+      },
+      {
+        "from": "ch_an5_1",
+        "to": "END",
+        "status": "alive",
+        "form": "human",
+        "note": "执念解除"
+      }
     ],
     "desc": "燕云烽火台的守卒，二十年前敌军来袭时点燃烽火报信，援兵没来。此后每天晚上继续点火，等有人来说'你的任务完成了'。",
     "color": "#4ade80",
@@ -131,8 +243,20 @@
     "firstAppear": "ch_an4_xianyan",
     "lastAppear": "ch_an4_xianyan",
     "statusTimeline": [
-      { "from": "BACKSTORY", "to": "ch_an4_xianyan", "status": "alive", "form": "披皮老者", "note": "各处独修的小妖·偶有聚会" },
-      { "from": "ch_an4_xianyan", "to": "END", "status": "alive", "form": "披皮老者", "note": "夜宴散后各自隐去·此后全书不再出场" }
+      {
+        "from": "BACKSTORY",
+        "to": "ch_an4_xianyan",
+        "status": "alive",
+        "form": "披皮老者",
+        "note": "各处独修的小妖·偶有聚会"
+      },
+      {
+        "from": "ch_an4_xianyan",
+        "to": "END",
+        "status": "alive",
+        "form": "披皮老者",
+        "note": "夜宴散后各自隐去·此后全书不再出场"
+      }
     ],
     "desc": "案四插曲'画皮夜宴'中出现的七位青衣老者，实为七只各有道行的小妖。各自独修于不同山林，偶因画皮妖召集而聚会饮宴——非画皮妖的固定属下，只是临时聚集的同道。剪纸为月、壶中酒不竭、铜钱穿月召请白衣女子（被剥皮女鬼）——这些手段都是它们各自的小术，凑在一起便有了仙宴气象。\n\n夜宴散后各自隐入夜色，此后全书不再出场——它们是一次性配角，目的是为画皮妖那场伪仙境堆出'仙气'。",
     "color": "#a3a3a3",
@@ -148,11 +272,45 @@
     "firstAppear": "案?",
     "lastAppear": "ch_final",
     "statusTimeline": [
-      { "from": "案?_登场", "to": "案?_战死", "status": "alive", "form": "human", "note": "镇魂司游击，活人" },
-      { "from": "案?_战死", "to": "案?_战死", "status": "dying", "form": "human", "note": "用尽法力对大妖，仅剩残魂", "knownToProtagonist": false },
-      { "from": "案?_战死", "to": "案?_苏醒", "status": "soul", "form": "in_jade", "note": "残魂被玉佩吸收，主角以为他死了", "knownToProtagonist": false },
-      { "from": "案?_苏醒", "to": "ch_final", "status": "soul", "form": "in_jade", "note": "玉佩中养魂，与主角能沟通", "knownToProtagonist": true },
-      { "from": "ch_final", "to": "END", "status": "reincarnated", "form": "已转世", "note": "残魂投胎为赵匡胤", "linkTo": "char_zhaoky" }
+      {
+        "from": "案?_登场",
+        "to": "案?_战死",
+        "status": "alive",
+        "form": "human",
+        "note": "镇魂司游击，活人"
+      },
+      {
+        "from": "案?_战死",
+        "to": "案?_战死",
+        "status": "dying",
+        "form": "human",
+        "note": "用尽法力对大妖，仅剩残魂",
+        "knownToProtagonist": false
+      },
+      {
+        "from": "案?_战死",
+        "to": "案?_苏醒",
+        "status": "soul",
+        "form": "in_jade",
+        "note": "残魂被玉佩吸收，主角以为他死了",
+        "knownToProtagonist": false
+      },
+      {
+        "from": "案?_苏醒",
+        "to": "ch_final",
+        "status": "soul",
+        "form": "in_jade",
+        "note": "玉佩中养魂，与主角能沟通",
+        "knownToProtagonist": true
+      },
+      {
+        "from": "ch_final",
+        "to": "END",
+        "status": "reincarnated",
+        "form": "已转世",
+        "note": "残魂投胎为赵匡胤",
+        "linkTo": "char_zhaoky"
+      }
     ],
     "desc": "镇魂司最后一个在编'游击'。镇魂司是唐玄宗年间秘密设立的机构，名义上隶属道录司，实奉太乙救苦天尊之命行事——维持人间阴阳秩序，妖魔横行则斩，冤魂不散则超度。唐亡后道录司烟消云散，镇魂司从未解散，因为它从来不属于任何朝廷，只属于幽冥秩序本身。腰间挂一块发黑的铜牌（幽冥令），妖鬼见之如见天尊；活人不认这块牌子，但妖鬼认。背一口窄身长刀，三十来岁，身形高大，常年风尘仆仆。话不多，做事利落，对妖鬼冷酷，对活人有底线。",
     "color": "#a78bfa",

@@ -9,7 +9,7 @@ import os
 
 PORT = 8266
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WORKSPACE_DIR = os.path.join(BASE_DIR, 'novel-workspace')
+WORKSPACE_DIR = BASE_DIR
 DATA_FILE = os.path.join(WORKSPACE_DIR, 'data')
 HTML_FILE = os.path.join(WORKSPACE_DIR, 'novel-studio.html')
 

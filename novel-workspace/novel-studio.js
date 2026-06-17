@@ -28,6 +28,7 @@ const Store = {
     materials:'ns_materials', knowledgeMap:'ns_knowledge_map',
     currentChapter:'ns_current_chapter',
     ollamaUrl:'ns_ollama_url', ollamaModel:'ns_ollama_model', aiHistory:'ns_ai_history',
+    editorSettings:'ns_editor_settings',
   },
   load(key) {
     try { const r = localStorage.getItem(this.KEYS[key]); return r ? JSON.parse(r) : null; } catch(e) { return null; }
@@ -64,6 +65,23 @@ const Store = {
   },
   saveAll() {
     Object.keys(DB).forEach(k => this.save(k, DB[k]));
+    this._syncToFiles();
+  },
+  async _syncToFiles() {
+    try {
+      const data = {}; Object.keys(DB).forEach(k => { data[k] = DB[k]; });
+      await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+    } catch(e) {}
+  },
+  async loadFromFiles() {
+    try {
+      const resp = await fetch('/api/data');
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      Object.entries(data).forEach(([k,v]) => { if (DB.hasOwnProperty(k)) DB[k] = v; });
+      this.saveAll();
+      return data;
+    } catch(e) { return null; }
   },
   exportAll() {
     const data = {};
@@ -110,31 +128,17 @@ const App = {
   init() {
     Store.loadAll();
     this._currentChapterId = Store.getCurrentChapter();
+    this._loadEditorSettings();
 
-    // 如果 localStorage 里没有数据，尝试从 data/*.json 迁移旧数据
-    const isEmpty = !DB.characters.length && !DB.chapters.length;
-    if (isEmpty) {
-      Store.loadFromFiles().then(files => {
-        if (Object.keys(files).length) {
-          this._migrateOldData(files);
-          Store.saveAll();
-          this._renderAll();
-          this._updateProjectName();
-          this._updateStatus();
-          this._toast('✅ 已从旧数据文件迁移数据');
-        } else {
-          this._renderAll();
-          this._updateProjectName();
-          this._updateStatus();
-          this._toast('✅ 工作台已就绪');
-        }
-      });
-    } else {
-      this._renderAll();
-      this._updateProjectName();
-      this._updateStatus();
-      this._toast('✅ 数据已加载');
-    }
+    Store.loadFromFiles().then(data => {
+      if (data) {
+        this._renderAll(); this._updateProjectName(); this._updateStatus();
+        this._toast('✅ 已加载');
+      } else {
+        this._renderAll(); this._updateProjectName(); this._updateStatus();
+        this._toast('✅ 就绪');
+      }
+    });
 
     this._bindEvents();
     this._startAutoSave();
@@ -680,6 +684,7 @@ const App = {
       </div>
     `;
   },
+
 
   // 手动触发从文件加载
   _reloadFromFiles() {
@@ -1690,12 +1695,14 @@ const App = {
     if (id) {
       const ch = DB.chapters.find(c => c.id === id);
       if (!ch) return;
-      document.getElementById('ch-title').value = ch.title || '';
+      const draft = this._getChapterDraft(id);
+      document.getElementById('ch-title').value = draft?.title ?? ch.title ?? '';
       document.getElementById('ch-status').value = ch.status || 'draft';
       document.getElementById('ch-mood').value = ch.mood || '紧张';
-      document.getElementById('ch-chars').value = ch.chars || '';
-      document.getElementById('ch-summary').value = ch.summary || '';
-      document.getElementById('ch-outline').value = ch.outline || '';
+      document.getElementById('ch-chars').value = draft?.chars ?? ch.chars ?? '';
+      document.getElementById('ch-summary').value = draft?.summary ?? ch.summary ?? '';
+      document.getElementById('ch-outline').value = draft?.outline ?? ch.outline ?? '';
+      if (draft) this._toast('💾 检测到未保存的草稿，已自动恢复');
     } else {
       ['ch-title','ch-chars','ch-summary','ch-outline'].forEach(f => document.getElementById(f).value = '');
       document.getElementById('ch-status').value = 'draft';
@@ -1703,6 +1710,28 @@ const App = {
     }
     this._openModal('modal-chapter');
     setTimeout(() => document.getElementById('ch-title').focus(), 100);
+  },
+
+  _autoSaveChapterDraft() {
+    if (!this._editingId) return;
+    const draft = {
+      id: this._editingId,
+      title: document.getElementById('ch-title').value,
+      chars: document.getElementById('ch-chars').value,
+      summary: document.getElementById('ch-summary').value,
+      outline: document.getElementById('ch-outline').value,
+      at: Date.now()
+    };
+    localStorage.setItem('nv_draft_' + this._editingId, JSON.stringify(draft));
+  },
+  _getChapterDraft(id) {
+    try {
+      const raw = localStorage.getItem('nv_draft_' + id);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+  },
+  _clearChapterDraft() {
+    if (this._editingId) localStorage.removeItem('nv_draft_' + this._editingId);
   },
 
   _saveChapter() {
@@ -2137,6 +2166,139 @@ const App = {
     this._toast(this._editingId ? '素材已更新 ✓' : '素材已添加 ✓');
   },
 
+  // ===== 编辑器设置 =====
+  _defaultEditorSettings() {
+    return {
+      fontSize: 16, lineHeight: 20, paddingX: 48, paraSpacing: 8,
+      textColor: '#cdd6f4', bgColor: '#1a1a2a',
+    };
+  },
+
+  _loadEditorSettings() {
+    const saved = Store.load('editorSettings');
+    const def = this._defaultEditorSettings();
+    this._editorSettings = saved ? { ...def, ...saved } : { ...def };
+    this._applyEditorSettings();
+  },
+
+  _applyEditorSettings() {
+    const s = this._editorSettings;
+    const ed = document.getElementById('editor');
+    ed.style.fontSize = s.fontSize + 'px';
+    ed.style.lineHeight = (s.lineHeight / 10).toFixed(1);
+    ed.style.paddingLeft = s.paddingX + 'px';
+    ed.style.paddingRight = s.paddingX + 'px';
+    ed.style.color = s.textColor;
+    ed.style.background = s.bgColor;
+    // 段落间距用 CSS 变量控制（textarea 不支持 paragraph-spacing，用 letter-spacing 补偿视觉效果）
+    document.documentElement.style.setProperty('--editor-para-gap', s.paraSpacing + 'px');
+  },
+
+  _openSettingsModal() {
+    const s = this._editorSettings;
+    document.getElementById('set-fontSize').value = s.fontSize;
+    document.getElementById('set-fontSizeVal').textContent = s.fontSize + 'px';
+    document.getElementById('set-lineHeight').value = s.lineHeight;
+    document.getElementById('set-lineHeightVal').textContent = (s.lineHeight / 10).toFixed(1);
+    document.getElementById('set-paddingX').value = s.paddingX;
+    document.getElementById('set-paddingXVal').textContent = s.paddingX + 'px';
+    document.getElementById('set-paraSpacing').value = s.paraSpacing;
+    document.getElementById('set-paraSpacingVal').textContent = s.paraSpacing + 'px';
+    document.getElementById('set-textColor').value = s.textColor;
+    document.getElementById('set-bgColor').value = s.bgColor;
+    // 高亮当前预设
+    document.querySelectorAll('#presetBar .preset-btn').forEach(b => b.classList.remove('active'));
+    const preset = this._detectPreset();
+    if (preset) {
+      const btn = document.querySelector(`#presetBar .preset-btn[data-preset="${preset}"]`);
+      if (btn) btn.classList.add('active');
+    }
+    this._openModal('modal-settings');
+  },
+
+  _bindSettingsPanel() {
+    // 实时预览
+    const onChange = () => {
+      this._editorSettings.fontSize = parseInt(document.getElementById('set-fontSize').value);
+      this._editorSettings.lineHeight = parseInt(document.getElementById('set-lineHeight').value);
+      this._editorSettings.paddingX = parseInt(document.getElementById('set-paddingX').value);
+      this._editorSettings.paraSpacing = parseInt(document.getElementById('set-paraSpacing').value);
+      this._editorSettings.textColor = document.getElementById('set-textColor').value;
+      this._editorSettings.bgColor = document.getElementById('set-bgColor').value;
+      document.getElementById('set-fontSizeVal').textContent = this._editorSettings.fontSize + 'px';
+      document.getElementById('set-lineHeightVal').textContent = (this._editorSettings.lineHeight / 10).toFixed(1);
+      document.getElementById('set-paddingXVal').textContent = this._editorSettings.paddingX + 'px';
+      document.getElementById('set-paraSpacingVal').textContent = this._editorSettings.paraSpacing + 'px';
+      this._applyEditorSettings();
+    };
+    ['set-fontSize','set-lineHeight','set-paddingX','set-paraSpacing','set-textColor','set-bgColor'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        onChange();
+        // 预设按钮去高亮
+        document.querySelectorAll('#presetBar .preset-btn').forEach(b => b.classList.remove('active'));
+      });
+    });
+
+    // 预设按钮
+    const presets = {
+      dark:  { fontSize:16, lineHeight:20, paddingX:48, paraSpacing:8,  textColor:'#cdd6f4', bgColor:'#1a1a2a' },
+      warm:  { fontSize:16, lineHeight:22, paddingX:48, paraSpacing:10, textColor:'#3d3226', bgColor:'#f5f0e2' },
+      light: { fontSize:16, lineHeight:20, paddingX:48, paraSpacing:8,  textColor:'#1e1e1e', bgColor:'#ffffff' },
+    };
+    document.querySelectorAll('#presetBar .preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = presets[btn.dataset.preset];
+        if (!p) return;
+        this._editorSettings = { ...p };
+        this._applyEditorSettings();
+        // 更新控件值
+        document.getElementById('set-fontSize').value = p.fontSize;
+        document.getElementById('set-fontSizeVal').textContent = p.fontSize + 'px';
+        document.getElementById('set-lineHeight').value = p.lineHeight;
+        document.getElementById('set-lineHeightVal').textContent = (p.lineHeight / 10).toFixed(1);
+        document.getElementById('set-paddingX').value = p.paddingX;
+        document.getElementById('set-paddingXVal').textContent = p.paddingX + 'px';
+        document.getElementById('set-paraSpacing').value = p.paraSpacing;
+        document.getElementById('set-paraSpacingVal').textContent = p.paraSpacing + 'px';
+        document.getElementById('set-textColor').value = p.textColor;
+        document.getElementById('set-bgColor').value = p.bgColor;
+        document.querySelectorAll('#presetBar .preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // 恢复默认
+    document.getElementById('btnResetSettings').addEventListener('click', () => {
+      this._editorSettings = this._defaultEditorSettings();
+      this._applyEditorSettings();
+      localStorage.removeItem(Store.KEYS.editorSettings);
+      this._openSettingsModal(); // 刷新弹窗控件值
+      this._toast('已恢复默认设置');
+    });
+
+    // 关闭时保存
+    document.querySelector('#modal-settings .modal-close').addEventListener('click', () => {
+      this._saveEditorSettings();
+      this._closeModal('modal-settings');
+    });
+    document.querySelector('#modal-settings .modal-cancel').addEventListener('click', () => {
+      this._saveEditorSettings();
+      this._closeModal('modal-settings');
+    });
+  },
+
+  _detectPreset() {
+    const s = this._editorSettings;
+    if (s.bgColor === '#1a1a2a' && s.textColor === '#cdd6f4') return 'dark';
+    if (s.bgColor === '#f5f0e2' && s.textColor === '#3d3226') return 'warm';
+    if (s.bgColor === '#ffffff' && s.textColor === '#1e1e1e') return 'light';
+    return null;
+  },
+
+  _saveEditorSettings() {
+    Store.save('editorSettings', this._editorSettings);
+  },
+
   // ===== 事件绑定 =====
   _bindEvents() {
     // 编辑器输入
@@ -2189,7 +2351,7 @@ const App = {
 
     // 模态框保存按钮
     document.getElementById('btnSaveProject').addEventListener('click', () => this._saveProject());
-    document.getElementById('btnSaveChapter').addEventListener('click', () => this._saveChapter());
+    document.getElementById('btnSaveChapter').addEventListener('click', () => { this._saveChapter(); this._clearChapterDraft(); });
     document.getElementById('btnSaveChar').addEventListener('click', () => this._saveChar());
     document.getElementById('btnSaveRel').addEventListener('click', () => this._saveRel());
     document.getElementById('btnSaveLoc').addEventListener('click', () => this._saveLoc());
@@ -2198,6 +2360,12 @@ const App = {
     document.getElementById('btnSaveTimeline').addEventListener('click', () => this._saveTimeline());
     document.getElementById('btnSaveMaterial').addEventListener('click', () => this._saveMaterial());
 
+    // 章节编辑器自动存草稿（防止误触丢失）
+    ['ch-title','ch-summary','ch-outline','ch-chars'].forEach(fid => {
+      const el = document.getElementById(fid);
+      if (el) el.addEventListener('input', () => this._autoSaveChapterDraft());
+    });
+
     // 模态框关闭
     document.querySelectorAll('.modal-close,.modal-cancel').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -2205,11 +2373,7 @@ const App = {
         if (overlay) { overlay.classList.remove('active'); this._editingId = null; }
       });
     });
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', e => {
-        if (e.target === overlay) { overlay.classList.remove('active'); this._editingId = null; }
-      });
-    });
+    // 禁止点击弹窗外部关闭（防止误触丢失内容）
 
     // AI
     document.getElementById('btnAiSend').addEventListener('click', () => this._sendAIMessage());
@@ -2237,6 +2401,10 @@ const App = {
 
     // 离开前保存
     window.addEventListener('beforeunload', () => { if (this._unsaved) this._saveCurrent(); });
+
+    // 设置面板
+    document.getElementById('btnSettings').addEventListener('click', () => this._openSettingsModal());
+    this._bindSettingsPanel();
   },
 
   // ===== 自动保存 =====

@@ -13,6 +13,7 @@
   <div id="toolbar">
     <span class="brand" id="projectName" onclick="openProjectModal()">📖 小说工作台</span>
     <div class="toolbar-right">
+      <button class="btn btn-sm" id="btnSettings" title="编辑器设置">⚙️</button>
       <button class="btn btn-sm" id="btnExport">📤 导出</button>
       <button class="btn btn-sm" id="btnImport">📥 导入</button>
       <button class="btn btn-sm btn-primary" id="btnSave">💾 保存</button>
@@ -152,7 +153,7 @@
 
 <!-- 章节编辑 -->
 <div class="modal-overlay" id="modal-chapter">
-  <div class="modal-box">
+  <div class="modal-box modal-chapter">
     <div class="modal-header"><span id="chapterModalTitle">新建章节</span><button class="btn btn-sm modal-close">✕</button></div>
     <div class="modal-body">
       <label>章节标题 *</label><input id="ch-title">
@@ -165,8 +166,8 @@
         </div>
       </div>
       <label>涉及人物</label><input id="ch-chars" placeholder="逗号分隔">
-      <label>章节摘要</label><textarea id="ch-summary" rows="3"></textarea>
-      <label>大纲要点</label><textarea id="ch-outline" rows="3" placeholder="本章要完成的事情"></textarea>
+      <label>章节摘要</label><textarea id="ch-summary" rows="6" placeholder="本章概要、核心情节、关键对白…"></textarea>
+      <label>大纲要点</label><textarea id="ch-outline" rows="8" placeholder="本章要完成的事情，按步骤列出…"></textarea>
     </div>
     <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveChapter">保存</button></div>
   </div>
@@ -350,6 +351,63 @@ ch_an1_7 → END      : dead · 已埋葬，剑尖刻名
       <label>来源/备注</label><input id="mat-source">
     </div>
     <div class="modal-footer"><button class="btn modal-cancel">取消</button><button class="btn btn-primary" id="btnSaveMaterial">保存</button></div>
+  </div>
+</div>
+
+<!-- 编辑器设置 -->
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal-box">
+    <div class="modal-header"><span>⚙️ 编辑器设置</span><button class="btn btn-sm modal-close">✕</button></div>
+    <div class="modal-body" style="gap:12px">
+      <div class="settings-preset-bar" id="presetBar">
+        <button class="preset-btn" data-preset="dark">🌙 暗色</button>
+        <button class="preset-btn" data-preset="warm">📜 暖黄</button>
+        <button class="preset-btn" data-preset="light">☀️ 浅色</button>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-item">
+          <label>字号</label>
+          <div class="settings-row-label">
+            <input type="range" id="set-fontSize" min="14" max="28" value="16" step="1">
+            <span class="range-val" id="set-fontSizeVal">16px</span>
+          </div>
+        </div>
+        <div class="settings-item">
+          <label>行间距</label>
+          <div class="settings-row-label">
+            <input type="range" id="set-lineHeight" min="14" max="32" value="20" step="1">
+            <span class="range-val" id="set-lineHeightVal">2.0</span>
+          </div>
+        </div>
+        <div class="settings-item">
+          <label>左右留白</label>
+          <div class="settings-row-label">
+            <input type="range" id="set-paddingX" min="20" max="120" value="48" step="4">
+            <span class="range-val" id="set-paddingXVal">48px</span>
+          </div>
+        </div>
+        <div class="settings-item">
+          <label>段落间距</label>
+          <div class="settings-row-label">
+            <input type="range" id="set-paraSpacing" min="0" max="24" value="8" step="2">
+            <span class="range-val" id="set-paraSpacingVal">8px</span>
+          </div>
+        </div>
+        <div class="settings-item">
+          <label>文字颜色</label>
+          <input type="color" id="set-textColor" value="#cdd6f4">
+        </div>
+        <div class="settings-item">
+          <label>背景颜色</label>
+          <input type="color" id="set-bgColor" value="#1a1a2a">
+        </div>
+      </div>
+      <div class="settings-hint">💡 设置自动保存到浏览器，刷新不丢失。点击预设可快速切换主题。</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="btnResetSettings">🔄 恢复默认</button>
+      <button class="btn modal-cancel">关闭</button>
+    </div>
   </div>
 </div>
 

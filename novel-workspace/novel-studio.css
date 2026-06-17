@@ -387,6 +387,18 @@ html,body {
   max-height:88vh; overflow-y:auto; box-shadow:var(--shadow);
 }
 .modal-box.modal-lg { width:680px; }
+.modal-box.modal-chapter {
+  width: 94vw; max-width: 1100px;
+  height: 92vh; max-height: none;
+  display:flex; flex-direction:column;
+}
+.modal-box.modal-chapter .modal-body {
+  flex:1; overflow-y:auto; display:flex; flex-direction:column;
+}
+.modal-box.modal-chapter #ch-summary,
+.modal-box.modal-chapter #ch-outline {
+  min-height: 180px; resize:vertical; flex-shrink:0;
+}
 .modal-header {
   display:flex; align-items:center; justify-content:space-between;
   padding:12px 16px; border-bottom:1px solid var(--border);
@@ -446,6 +458,27 @@ html,body {
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:var(--border-light); }
+
+/* ---- 编辑器设置面板 ---- */
+.settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.settings-item { display:flex; flex-direction:column; gap:4px; }
+.settings-item label { font-size:12px; color:var(--text-dim); }
+.settings-item input[type="range"] { width:100%; accent-color:var(--accent); }
+.settings-item input[type="color"] {
+  width:48px; height:32px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:transparent; cursor:pointer; padding:2px;
+}
+.settings-item .range-val { font-size:11px; color:var(--text-muted); margin-left:6px; }
+.settings-row-label { display:flex; align-items:center; gap:6px; }
+.settings-preset-bar { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.settings-preset-bar .preset-btn {
+  font-size:11px; padding:4px 10px; border-radius:99px; cursor:pointer;
+  border:1px solid var(--border); background:transparent; color:var(--text-dim);
+  transition:var(--transition);
+}
+.settings-preset-bar .preset-btn:hover { border-color:var(--accent-dim); color:var(--accent); }
+.settings-preset-bar .preset-btn.active { background:var(--accent-dim); color:var(--bg); border-color:var(--accent-dim); }
+.settings-hint { font-size:11px; color:var(--text-muted); margin-top:8px; line-height:1.5; }
 
 /* ---- 响应式 ---- */
 @media (max-width:900px) {
